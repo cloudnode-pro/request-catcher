@@ -38,6 +38,101 @@ export default class Main {
     }
 
     /**
+     * Get config options from command line arguments
+     *  --cert, -c  {@link Config.tls.cert}
+     *  --key, -k   {@link Config.tls.key}
+     *  --https, -s {@link Config.tls.port}
+     *  --http, -p  {@link Config.port}
+     *  --name, -n  {@link Config.serverName}
+     * @param [args=process.argv] Arguments to parse
+     * @static
+     */
+    public static async getConfigFromArgs(args: string[] = process.argv): Promise<Config> {
+        const parsedArgs = Main.parseArgs(args);
+        const cliOptions = Main.mergeAliases(parsedArgs, {
+            cert: ["c"],
+            key: ["k"],
+            https: ["s"],
+            http: ["p"],
+            name: ["n"]
+        }) as {cert?: string | string[] | true, key?: string | string[] | true, https?: string | string[] | true, http?: string | string[] | true, name?: string | string[] | true};
+        const config = await Main.loadConfig();
+        if (config.tls) {
+            if (cliOptions.cert) config.tls.cert = String(cliOptions.cert);
+            if (cliOptions.key) config.tls.key = String(cliOptions.key);
+            if (cliOptions.https && !Number.isNaN(Number(cliOptions.https))) config.tls.port = Number(cliOptions.https);
+        }
+        else if ([cliOptions.cert, cliOptions.key, cliOptions.https].every(v => v !== undefined)) {
+            config.tls = {
+                cert: String(cliOptions.cert),
+                key: String(cliOptions.key),
+                port: Number(cliOptions.https)
+            };
+        }
+        if (cliOptions.http && !Number.isNaN(Number(cliOptions.http))) config.port = Number(cliOptions.http);
+        if (cliOptions.name) config.serverName = String(cliOptions.name);
+        return config;
+    }
+
+    /**
+     * Parse command line arguments
+     * @param args Arguments to parse
+     * @private
+     * @static
+     */
+    private static parseArgs(args: string[]): Record<string, string | string[] | true> {
+        const result: Record<string, string | string[] | true> = {};
+        for (const index in args) {
+            const i = Number(index);
+            const arg = args[i]!;
+            if (Main.argIsKey(arg)) {
+                const slashCount = arg.startsWith("--") ? 2 : 1;
+                const hasImmediateValue = arg.indexOf("=") !== -1;
+                const key = arg.slice(slashCount, hasImmediateValue ? arg.indexOf("=") : undefined);
+                const nextArg = args[i + 1];
+                const value = hasImmediateValue ? arg.slice(arg.indexOf("=") + 1) : nextArg && !Main.argIsKey(nextArg) ? nextArg : true;
+                if (result[key] === undefined) result[key] = value;
+                else if (typeof value === "string" && Array.isArray(result[key])) (result[key] as string[]).push(value);
+                else if (typeof value === "string" && typeof result[key] === "string") result[key] = [result[key] as string, value];
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Merge alias keys
+     * @param args Parsed arguments
+     * @param aliases Aliases to merge
+     * @returns Merged arguments
+     * @private
+     * @static
+     */
+    private static mergeAliases(args: Record<string, string | string[] | true>, aliases: Record<string, string | string[]>): Record<string, string | string[] | true> {
+        const result: Record<string, string | string[] | true> = {};
+        for (const key of Object.keys(aliases)) {
+            const alias: string[] = Array.isArray(aliases[key]) ? aliases[key] as string[] : [aliases[key] as string];
+            alias.push(key);
+            for (const aliasKey of alias) {
+                if (args[aliasKey] !== undefined) {
+                    result[key] = args[aliasKey]!;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Whether the provided argument string is a key
+     * @private
+     * @static
+     * @internal
+     */
+    private static argIsKey(arg: string): boolean {
+        return /^--?([a-zA-Z\d_-]+)(?:=(.*))?$/.test(arg);
+    }
+
+    /**
      * Default configuration
      * @private
      * @static
