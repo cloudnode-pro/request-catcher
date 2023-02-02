@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Catch and debug HTTP packets or forward them to a local host",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "sudo c8 -r=html -r=text mocha"
   },
