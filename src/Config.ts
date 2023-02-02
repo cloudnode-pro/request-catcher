@@ -28,7 +28,7 @@ export default interface Config {
      * Port to use for HTTP
      * @default 80
      */
-    port: number;
+    port?: number;
 
     /**
      * Server name broadcasted in the `Server` HTTP header. Set to `undefined` to disable.
