@@ -29,6 +29,15 @@ export default class Main {
     public static readonly dir = new URL("../", import.meta.url).pathname;
 
     /**
+     * Load configuration. If a `config.json` file is readable, it will be used. Otherwise, a default configuration will be used.
+     * @static
+     */
+    public static async loadConfig(): Promise<Config> {
+        if (await Main.configExists()) return await Main.readConfig();
+        else return Main.defaultConfig;
+    }
+
+    /**
      * Default configuration
      * @private
      * @static
@@ -62,14 +71,5 @@ export default class Main {
      */
     private static async readConfig(): Promise<Config> {
         return JSON.parse(await fs.readFile(path.join(Main.dir, "config.json"), "utf8"));
-    }
-
-    /**
-     * Load configuration. If a `config.json` file is readable, it will be used. Otherwise, a default configuration will be used.
-     * @static
-     */
-    public static async loadConfig(): Promise<Config> {
-        if (await Main.configExists()) return await Main.readConfig();
-        else return Main.defaultConfig;
     }
 }
