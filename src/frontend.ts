@@ -271,14 +271,29 @@ document.addEventListener("DOMContentLoaded", () => {
         const socket = io();
         console.log(namespace)
         socket.emit("namespace", namespace);
+
+        const buildingRequests: Record<string, Partial<{id: string, senderIp: string, serverIp: string, serverPort: number, headers: string[], version: string, method: string, url: string, data: ArrayBuffer[]}>> = {};
+
         socket.on("request", (id: string, senderIp?: string, serverIp?: string, serverPort?: number) => {
-            console.log("Request begins", id, senderIp, serverIp, serverPort);
+            buildingRequests[id] = {id, senderIp, serverIp, serverPort};
         });
         socket.on("data", (id: string, packet: ArrayBuffer) => {
-            console.log("data:", id, new TextDecoder().decode(packet));
+            const req = buildingRequests[id];
+            if (!req) return;
+            if (!req.data) req.data = [];
+            req.data.push(packet);
         });
         socket.on("end", (id: string, headers: string[], version: string, method: string, url: string) => {
-            console.log("end:", id, headers, version, method, url);
+            const req = buildingRequests[id];
+            if (!req) return;
+            req.headers = headers;
+            req.version = version;
+            req.method = method;
+            req.url = location.protocol + "//" + location.host + url;
+            if ([req.id, req.senderIp, req.serverIp, req.serverPort, req.data].some(v => v === undefined)) return;
+            const request = new Request(id, req.data!.map(d => new TextDecoder().decode(d)).join(""), req.headers, req.method, new URL(req.url), req.senderIp!, req.serverIp!, new Date(), namespace, req.version);
+            delete buildingRequests[id];
+            storage.add(request);
         });
     }
 });
