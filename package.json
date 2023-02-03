@@ -5,7 +5,12 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "sudo c8 -r=html -r=text mocha"
+    "test": "sudo c8 -r=html -r=text mocha",
+    "build:ts": "tsc",
+    "build:tw": "tailwindcss -i ./css/main.tw.css -o ./css/main.css",
+    "build": "npm run build:ts && npm run build:tw",
+    "start": "sudo node .",
+    "start:build": "npm run build && npm run start"
   },
   "repository": {
     "type": "git",
