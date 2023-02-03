@@ -179,7 +179,7 @@ export default class WebServer {
             res.end("internal server error");
         }
         else {
-            const namespace = req.url!.slice(3);
+            const namespace = req.url!.slice(3, req.url!.indexOf("?") === -1 ? undefined : req.url!.indexOf("?"));
             res.writeHead(204);
             res.end();
             this.servers.websocket.to(namespace).emit("end", requestId, req.rawHeaders, req.httpVersion, req.method, req.url);
@@ -200,7 +200,7 @@ export default class WebServer {
                 if (parts.length < 2) return;
                 const url = parts[1]!;
                 if (url.startsWith("/s/")) {
-                    socketId = url.substring(3);
+                    socketId = url.slice(3, url.indexOf("?") === -1 ? undefined : url.indexOf("?"));
                     requestId = crypto.randomBytes(18).toString("base64").replace(/[^a-zA-Z0-9]/g, "").slice(0, 6);
                     const port = socket.remotePort;
                     if (port) this.connections.set(port, {req: requestId, time: Date.now()});

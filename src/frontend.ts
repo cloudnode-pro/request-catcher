@@ -113,6 +113,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         /**
+         * Get raw headers
+         * @readonly
+         */
+        public get rawHeaders(): string {
+            return this.data.split("\r\n\r\n")[0]!;
+        }
+
+        /**
          * Format request as plain object
          */
         public toObject(): Record<string, any> {
@@ -144,6 +152,183 @@ document.addEventListener("DOMContentLoaded", () => {
         public static fromJSON(json: string): Request {
             const obj = JSON.parse(json);
             return new Request(obj.id, obj.data, obj.headers, obj.method, new URL(obj.url), obj.ip, obj.serverIp, new Date(obj.date), obj.namespace, obj.httpVersion);
+        }
+
+        /**
+         * Render request as HTML on the page
+         */
+        public render(): void {
+            const methodColours: Record<string, { bg: string, text: string }> = {
+                GET: {
+                    bg: "bg-green-200",
+                    text: "text-green-800"
+                },
+                POST: {
+                    bg: "bg-blue-200",
+                    text: "text-blue-800"
+                },
+                PUT: {
+                    bg: "bg-orange-200",
+                    text: "text-orange-800"
+                },
+                PATCH: {
+                    bg: "bg-amber-200",
+                    text: "text-amber-800"
+                },
+                DELETE: {
+                    bg: "bg-red-200",
+                    text: "text-red-800"
+                },
+                HEAD: {
+                    bg: "bg-indigo-200",
+                    text: "text-indigo-800"
+                },
+                OPTIONS: {
+                    bg: "bg-sky-200",
+                    text: "text-sky-800"
+                },
+                unknown: {
+                    bg: "bg-slate-200",
+                    text: "text-slate-800"
+                }
+            }
+
+            const formattedMethod = document.querySelector(`[data-req="formatted-method"]`);
+            if (formattedMethod) {
+                formattedMethod.textContent = this.method;
+                const colours = methodColours[this.method] ?? methodColours.unknown!;
+                formattedMethod.classList.add(colours.bg, colours.text);
+            }
+
+            const senderIp = document.querySelector(`[data-req="sender-ip"]`);
+            if (senderIp) senderIp.textContent = this.ip.startsWith("::ffff:") ? this.ip.slice(7) : this.ip;
+
+            const id = document.querySelector(`[data-req="id"]`);
+            if (id) id.textContent = this.id;
+
+            const date = document.querySelector(`[data-req="date"]`);
+            if (date) date.innerHTML = `<time datetime="${this.date.toISOString()}">${this.date.toLocaleDateString(navigator.language, {month: 'short', day: 'numeric', year: 'numeric', hour: "numeric", minute: "numeric"})}</time>`;
+
+            const method = document.querySelector(`[data-req="method"]`);
+            if (method) method.textContent = this.method;
+
+            const formattedUrl = document.querySelector(`[data-req="formatted-url"]`);
+            if (formattedUrl) {
+                for (const child of formattedUrl.children) child.remove();
+                const protocol = document.createElement("span");
+                protocol.classList.add("text-slate-500");
+                protocol.textContent = this.url.protocol + "//";
+                formattedUrl.appendChild(protocol);
+                const main = document.createElement("span");
+                main.classList.add("text-slate-900");
+                main.textContent = this.url.host + this.url.pathname;
+                formattedUrl.appendChild(main);
+                const searchParams = Object.fromEntries(this.url.searchParams);
+                if (Object.keys(searchParams).length > 0) {
+                    const query: HTMLSpanElement[] = [];
+                    const questionMark = document.createElement("span");
+                    questionMark.classList.add("text-slate-500");
+                    questionMark.textContent = "?";
+                    query.push(questionMark);
+                    const ampersand = () => {
+                        const amp = document.createElement("span");
+                        amp.classList.add("text-slate-500");
+                        amp.textContent = "&";
+                        return amp;
+                    }
+                    for (const i in Object.entries(searchParams)) {
+                        const index = Number(i);
+                        const [key, value] = Object.entries(searchParams)[index]!;
+                        const keySpan = document.createElement("span");
+                        keySpan.classList.add("text-blue-600");
+                        keySpan.textContent = key;
+                        query.push(keySpan);
+                        const equals = document.createElement("span");
+                        equals.classList.add("text-slate-500");
+                        equals.textContent = "=";
+                        query.push(equals);
+                        if (value) {
+                            const valueSpan = document.createElement("span");
+                            valueSpan.classList.add("text-slate-900");
+                            valueSpan.textContent = value;
+                            query.push(valueSpan);
+                        }
+                        if (index < Object.entries(searchParams).length - 1) query.push(ampersand());
+                    }
+                    formattedUrl.append(...query);
+                }
+            }
+
+            const scheme = document.querySelector(`[data-req="scheme"]`);
+            if (scheme) scheme.textContent = this.url.protocol.slice(0, -1);
+
+            const host = document.querySelector(`[data-req="host"]`);
+            if (host) host.textContent = this.url.host;
+
+            const path = document.querySelector(`[data-req="path"]`);
+            if (path) path.textContent = this.url.pathname;
+
+            const formattedQuery = document.querySelector(`[data-req="formatted-query"]`);
+            if (formattedQuery) {
+                const searchParams = Object.fromEntries(this.url.searchParams);
+                if (Object.keys(searchParams).length > 0) {
+                    formattedQuery.classList.remove("hidden");
+                    for (const child of formattedQuery.children) child.remove();
+                    for (const [key, value] of Object.entries(searchParams)) {
+                        // <li><span class="text-blue-600 mr-1">query:</span> <span class="text-slate-900">data</span></li>
+                        const li = document.createElement("li");
+                        const keySpan = document.createElement("span");
+                        keySpan.classList.add("text-blue-600", "mr-1");
+                        keySpan.textContent = key + ":";
+                        li.appendChild(keySpan);
+                        if (value) {
+                            li.appendChild(document.createTextNode(" "));
+                            const valueSpan = document.createElement("span");
+                            valueSpan.classList.add("text-slate-900");
+                            valueSpan.textContent = value;
+                            li.appendChild(valueSpan);
+                        }
+                        formattedQuery.appendChild(li);
+                    }
+                }
+                else formattedQuery.classList.add("hidden");
+            }
+
+            const serverAddress = document.querySelector(`[data-req="server-address"]`);
+            if (serverAddress) serverAddress.textContent = this.serverIp.startsWith("::ffff:") ? this.serverIp.slice(7) : this.serverIp;
+
+            const httpVersion = document.querySelector(`[data-req="http-version"]`);
+            if (httpVersion) httpVersion.textContent = `HTTP/${this.httpVersion}`;
+
+            const formattedHeaders = document.querySelector(`[data-req="formatted-headers"]`);
+            if (formattedHeaders) {
+                //this.headers = ["header-name", "value", "header-name", "value", ...]
+                const headerNames = this.headers.filter((_, i) => i % 2 === 0);
+                const headerValues = this.headers.filter((_, i) => i % 2 === 1);
+                const headers: [string, string][] = [];
+                const capitalise = (str: string) => str.split("-").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join("-");
+                for (const i in headerNames) headers.push([capitalise(headerNames[i]!), headerValues[i]!]);
+                const sortedHeaders = headers.sort((a, b) => a[0].localeCompare(b[0]));
+
+                // <li><span class="text-blue-600 mr-1">Host:</span> <span class="text-slate-900">req.cldn.pro</span></li>
+                for (const child of formattedHeaders.children) child.remove();
+                for (const [key, value] of sortedHeaders) {
+                    const li = document.createElement("li");
+                    const keySpan = document.createElement("span");
+                    keySpan.classList.add("text-blue-600", "mr-1");
+                    keySpan.textContent = key + ":";
+                    li.appendChild(keySpan);
+                    li.appendChild(document.createTextNode(" "));
+                    const valueSpan = document.createElement("span");
+                    valueSpan.classList.add("text-slate-900");
+                    valueSpan.textContent = value;
+                    li.appendChild(valueSpan);
+                    formattedHeaders.appendChild(li);
+                }
+            }
+
+            const rawHeaders = document.querySelector(`[data-req="raw-headers"]`);
+            if (rawHeaders) rawHeaders.textContent = this.rawHeaders;
         }
     }
 
@@ -265,6 +450,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         else {
             showScreen("main");
+            const lastRequest = requests[requests.length - 1]!;
+            lastRequest.render();
         }
 
         // @ts-ignore
@@ -291,9 +478,32 @@ document.addEventListener("DOMContentLoaded", () => {
             req.method = method;
             req.url = location.protocol + "//" + location.host + url;
             if ([req.id, req.senderIp, req.serverIp, req.serverPort, req.data].some(v => v === undefined)) return;
-            const request = new Request(id, req.data!.map(d => new TextDecoder().decode(d)).join(""), req.headers, req.method, new URL(req.url), req.senderIp!, req.serverIp!, new Date(), namespace, req.version);
+            const request = new Request(id, req.data!.map(d => new TextDecoder().decode(d)).join(""), req.headers, req.method, new URL(req.url), req.senderIp!, req.serverIp! + ":" + req.serverPort, new Date(), namespace, req.version);
             delete buildingRequests[id];
             storage.add(request);
+            showScreen("main");
+            request.render();
         });
+
+        // switch for toggling between parsed and raw headers
+        const switchHeaders = document.querySelector(`[data-req="switch-headers"]`);
+        const formattedHeaders = document.querySelector(`[data-req="formatted-headers"]`);
+        const rawHeaders = document.querySelector(`[data-req="raw-headers"]`);
+        if (switchHeaders && formattedHeaders && rawHeaders) {
+            const switchHeadersFn = () => {
+                if ((switchHeaders as HTMLInputElement).checked) {
+                    formattedHeaders.classList.add("hidden");
+                    rawHeaders.classList.remove("hidden");
+                }
+                else {
+                    formattedHeaders.classList.remove("hidden");
+                    rawHeaders.classList.add("hidden");
+                }
+            };
+            switchHeaders.addEventListener("change", () => {
+                switchHeadersFn();
+            });
+            switchHeadersFn();
+        }
     }
 });

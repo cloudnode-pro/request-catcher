@@ -72,10 +72,10 @@
 	</div>
 	<div class="h-full w-full overflow-auto p-10">
 		<p class="flex items-center space-x-2">
-			<span class="rounded-full bg-green-200 px-3 py-0.5 text-lg font-medium text-green-800">GET</span>
-			<span class="text-xl font-medium text-slate-900">::ffff:127.42.255.69</span>
+			<span class="rounded-full px-3 py-0.5 text-lg font-medium" data-req="formatted-method"></span>
+			<span class="text-xl font-medium text-slate-900" data-req="sender-ip"></span>
 		</p>
-		<p class="mt-1 text-slate-500">#JYG4R8 <span aria-hidden="true">&middot;</span> Jan 31 2023, 01:32</p>
+		<p class="mt-1 text-slate-500">#<span data-req="id"></span> <span aria-hidden="true">&middot;</span> <span data-req="date"></span></p>
 		<div class="mt-5 flex space-x-3">
 			<button type="button" class="flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
 				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="-ml-1 mr-2 h-5 w-5 text-slate-500">
@@ -88,7 +88,6 @@
 					<path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z"/>
 					<path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z"/>
 				</svg>
-
 				Download
 			</button>
 		</div>
@@ -128,23 +127,19 @@
 										</svg>
 									</div>
 									<p class="text-sm tracking-tight">
-										<span class="font-semibold text-slate-500 mr-1">GET</span><span class="group-open:hidden"> <span class="text-slate-500">https://</span><span class="text-slate-900">req.cldn.pro/s/66B3bD9g11t1v41Ia73a7NSi</span><span class="text-slate-500">?</span><span class="text-blue-600">query</span><span class="text-slate-500">=</span><span class="text-slate-900">data</span></span>
+										<span class="font-semibold text-slate-500 mr-1" data-req="method"></span> <span class="group-open:hidden" data-req="formatted-url"></span>
 									</p>
 								</summary>
 								<div class="text-sm px-6">
 									<ul class="border-b border-slate-200 pb-2">
-										<li><span class="text-blue-600 mr-1">Scheme:</span> <span class="text-slate-900">https</span></li>
-										<li><span class="text-blue-600 mr-1">Host:</span> <span class="text-slate-900">req.cldn.pro</span>
-										</li>
-										<li><span class="text-blue-600 mr-1">Filename:</span>
-											<span class="text-slate-900">/s/66B3bD9g11t1v41Ia73a7NSi</span></li>
+										<li><span class="text-blue-600 mr-1">Scheme:</span> <span class="text-slate-900" data-req="scheme"></span></li>
+										<li><span class="text-blue-600 mr-1">Host:</span> <span class="text-slate-900" data-req="host"></span></li>
+										<li><span class="text-blue-600 mr-1">Filename:</span> <span class="text-slate-900" data-req="path"></span></li>
 									</ul>
-									<ul class="border-b border-slate-200 py-2">
-										<li><span class="text-blue-600 mr-1">query:</span> <span class="text-slate-900">data</span></li>
-									</ul>
+									<ul class="border-b border-slate-200 py-2" data-req="formatted-query"></ul>
 									<ul class="py-2">
 										<li><span class="text-blue-600 mr-1">Address:</span>
-											<span class="text-slate-900">104.16.92.83:443</span></li>
+											<span class="text-slate-900" data-req="server-address"></span></li>
 									</ul>
 								</div>
 							</details>
@@ -156,12 +151,12 @@
 							</div>
 							<div class="flex text-sm">
 								<p class="text-slate-500 w-16">Version</p>
-								<p class="text-slate-900">HTTP/2</p>
+								<p class="text-slate-900" data-req="http-version"></p>
 							</div>
 						</div>
 						<div>
 							<details class="group" open>
-								<summary class="marker:hidden marker:content-none cursor-pointer border-b border-slate-200 flex items-center py-2 bg-slate-50 hover:bg-slate-100">
+								<summary class="marker:hidden marker:content-none cursor-pointer flex items-center py-2 bg-slate-50 hover:bg-slate-100">
 									<div class="text-slate-500 pl-1">
 										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 block group-open:hidden">
 											<path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/>
@@ -174,65 +169,13 @@
 									<div class="ml-auto pr-3">
 										<label class="flex items-center space-x-2">
 											<span class="text-sm text-slate-900">Raw</span>
-											<input type="checkbox" class="peer sr-only">
+											<input type="checkbox" class="peer sr-only" data-req="switch-headers">
 											<div class="border-2 relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-transparent bg-slate-200 transition-colors duration-200 ease-in-out peer-checked:bg-blue-600 before:block before:content-[''] before:h-4 before:w-4 before:translate-x-0 before:transform before:rounded-full before:bg-white before:shadow before:ring-0 before:trnasition before:duration-200 before:ease-in-out peer-checked:before:translate-x-5"></div>
 										</label>
 									</div>
 								</summary>
-								<ul class="pl-6 text-sm py-1 border-b border-slate-200">
-									<li><span class="text-blue-600 mr-1">Accept:</span>
-										<span class="text-slate-900">text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8</span>
-									</li>
-									<li><span class="text-blue-600 mr-1">Accept-Encoding:</span>
-										<span class="text-slate-900">gzip, deflate, b</span></li>
-									<li><span class="text-blue-600 mr-1">Accept-Language:</span>
-										<span class="text-slate-900">en-US,en;q=0.5</span></li>
-									<li><span class="text-blue-600 mr-1">Connection:</span> <span class="text-slate-900">keepalive</span>
-									</li>
-									<li><span class="text-blue-600 mr-1">DNT:</span> <span class="text-slate-900">1</span></li>
-									<li><span class="text-blue-600 mr-1">Host:</span> <span class="text-slate-900">req.cldn.pro</span>
-									</li>
-									<li><span class="text-blue-600 mr-1">Sec-Fetch-Dest:</span>
-										<span class="text-slate-900">document</span></li>
-									<li><span class="text-blue-600 mr-1">Sec-Fetch-Mode:</span>
-										<span class="text-slate-900">navigate</span></li>
-									<li><span class="text-blue-600 mr-1">Sec-Fetch-Site:</span> <span class="text-slate-900">none</span>
-									</li>
-									<li><span class="text-blue-600 mr-1">Sec-Fetch-User:</span> <span class="text-slate-900">?1</span>
-									</li>
-									<li><span class="text-blue-600 mr-1">Upgrade-Insecure-Requests:</span>
-										<span class="text-slate-900">1</span></li>
-									<li><span class="text-blue-600 mr-1">User-Agent:</span>
-										<span class="text-slate-900">Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/109.0</span>
-									</li>
-								</ul>
-							</details>
-						</div>
-						<div>
-							<details class="group" open>
-								<summary class="marker:hidden marker:content-none cursor-pointer group-open:border-b border-slate-200 flex items-center py-2 bg-slate-50 hover:bg-slate-100">
-									<div class="text-slate-500 pl-1">
-										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 block group-open:hidden">
-											<path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/>
-										</svg>
-										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 group-open:block hidden">
-											<path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
-										</svg>
-									</div>
-									<p class="text-sm text-slate-900">Response Headers</p>
-									<div class="ml-auto pr-3">
-										<label class="flex items-center space-x-2">
-											<span class="text-sm text-slate-900">Raw</span>
-											<input type="checkbox" class="peer sr-only">
-											<div class="border-2 relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-transparent bg-slate-200 transition-colors duration-200 ease-in-out peer-checked:bg-blue-600 before:block before:content-[''] before:h-4 before:w-4 before:translate-x-0 before:transform before:rounded-full before:bg-white before:shadow before:ring-0 before:trnasition before:duration-200 before:ease-in-out peer-checked:before:translate-x-5"></div>
-										</label>
-									</div>
-								</summary>
-								<ul class="pl-6 text-sm py-1">
-									<li><span class="text-blue-600 mr-1">Date:</span>
-										<span class="text-slate-900">Tue, 31 Jan 2023 00:41:13 GMT</span></li>
-									<li><span class="text-blue-600 mr-1">Server:</span> <span class="text-slate-900">cldn</span></li>
-								</ul>
+								<ul class="text-sm py-3 px-4 hidden" data-req="formatted-headers"></ul>
+								<pre class="w-full border-0 py-3 px-4 text-sm overflow-auto text-slate-900 hidden" data-req="raw-headers"></pre>
 							</details>
 						</div>
 					</div>
