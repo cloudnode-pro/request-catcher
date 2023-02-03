@@ -100,7 +100,7 @@ export default class WebServer {
         }
 
         this.servers.http.on("connection", this.connectionHandler.bind(this));
-        if (this.servers.https) this.servers.https.on("connection", this.connectionHandler.bind(this));
+        if (this.servers.https) this.servers.https.on("secureConnection", this.connectionHandler.bind(this));
 
         this.servers.http.listen(portHttp);
         if (this.servers.https) this.servers.https.listen(portHttps);
