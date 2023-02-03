@@ -179,9 +179,10 @@ export default class WebServer {
             res.end("internal server error");
         }
         else {
-            console.log("end", req.rawHeaders);
+            const namespace = req.url!.slice(3);
             res.writeHead(204);
             res.end();
+            this.servers.websocket.to(namespace).emit("end", requestId, req.rawHeaders, req.httpVersion, req.method, req.url);
         }
     }
 
@@ -203,11 +204,11 @@ export default class WebServer {
                     requestId = crypto.randomBytes(18).toString("base64").replace(/[^a-zA-Z0-9]/g, "").slice(0, 6);
                     const port = socket.remotePort;
                     if (port) this.connections.set(port, {req: requestId, time: Date.now()});
+                    this.servers.websocket.to(socketId).emit("request", requestId, socket.remoteAddress, socket.localAddress, socket.localPort);
                 }
             }
             if (socketId) {
-                // push packet
-                console.log(packet.toString());
+                this.servers.websocket.to(socketId).emit("data", requestId, packet);
             }
         });
     }
