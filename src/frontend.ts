@@ -175,6 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
          */
         public add(request: Request): void {
             this.requests.push(request);
+            this.save();
         }
 
         /**
@@ -191,6 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
          */
         public delete(id: string): void {
             this.requests.splice(this.requests.findIndex(r => r.id === id), 1);
+            this.save();
         }
 
         /**
@@ -207,6 +209,7 @@ document.addEventListener("DOMContentLoaded", () => {
          */
         public deleteOldest(n?: number): void {
             this.requests.splice(0, n ?? this.requests.length);
+            this.save();
         }
 
         /**
@@ -214,6 +217,13 @@ document.addEventListener("DOMContentLoaded", () => {
          */
         public toJSON(): string {
             return JSON.stringify(this.requests.map(r => r.toObject()));
+        }
+
+        /**
+         * Save to local storage
+         */
+        public save(): void {
+            localStorage.setItem("requests", this.toJSON());
         }
 
         /**
