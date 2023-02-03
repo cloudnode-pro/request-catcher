@@ -44,7 +44,7 @@ export default class WebServer {
      * Map socket remote port -> request ID
      * @readonly
      */
-    public readonly connections = new Map<number, {req: Buffer, time: number}>();
+    public readonly connections = new Map<number, {req: string, time: number}>();
 
     /**
      * Instantiate a new web server
@@ -87,7 +87,7 @@ export default class WebServer {
      * Get request ID from incoming message
      * @param req Incoming message
      */
-    public getRequestId(req: http.IncomingMessage): Buffer | undefined {
+    public getRequestId(req: http.IncomingMessage): string | undefined {
         const socket = req.socket;
         const port = socket.remotePort;
         if (!port) return;
@@ -136,7 +136,7 @@ export default class WebServer {
      */
     public connectionHandler(socket: net.Socket): void {
         let socketId: string;
-        let requestId: Buffer;
+        let requestId: string;
         socket.on("data", (packet: Buffer) => {
             // first packet
             if (socket.bytesRead === packet.length) {
@@ -145,7 +145,7 @@ export default class WebServer {
                 const url = parts[1]!;
                 if (url.startsWith("/s/")) {
                     socketId = url.substring(3);
-                    requestId = crypto.randomBytes(64);
+                    requestId = crypto.randomBytes(18).toString("base64").replace(/[^a-zA-Z0-9]/g, "").slice(0, 6);
                     const port = socket.remotePort;
                     if (port) this.connections.set(port, {req: requestId, time: Date.now()});
                 }
