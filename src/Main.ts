@@ -1,4 +1,5 @@
 import Config from "./Config";
+import WebServer from "./WebServer.js";
 import fs from "node:fs/promises";
 import path from "path";
 
@@ -14,11 +15,26 @@ export default class Main {
     public readonly config: Readonly<Config>;
 
     /**
+     * Web server
+     * @readonly
+     */
+    public webServer?: WebServer;
+
+    /**
      * Create a new instance
      * @param config Configuration to use
      */
     public constructor(config: Config) {
         this.config = config;
+    }
+
+    /**
+     * Start web server
+     */
+    public async start(): Promise<void> {
+        const cert = this.config.tls?.cert ? await fs.readFile(this.config.tls.cert) : undefined;
+        const key = this.config.tls?.key ? await fs.readFile(this.config.tls.key) : undefined;
+        this.webServer = new WebServer(this, this.config.port, this.config.tls?.port, cert, key);
     }
 
     /**
