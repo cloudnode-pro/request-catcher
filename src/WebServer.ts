@@ -61,7 +61,7 @@ export default class WebServer {
      */
     public get home(): string {
         const home = this.staticFiles["/"];
-        if (home) return Mustache.render(home.toString(), {
+        if (home) return Mustache.render(home.data.toString(), {
            random: crypto.randomBytes(18).toString("base64").replaceAll("/", "").slice(0, 16),
         });
         return "UI not available";
@@ -152,7 +152,7 @@ export default class WebServer {
             res.end("bad request");
         }
         else if (req.url.startsWith("/s/")) return this.respondToSRequest(req, res);
-        else if (req.url in this.staticFiles) {
+        else if (req.url !== "/" && req.url in this.staticFiles) {
             const file = this.staticFiles[req.url!]!;
             res.writeHead(200, {"Content-Type": file.type});
             res.end(file.data);
