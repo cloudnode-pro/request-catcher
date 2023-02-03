@@ -3,6 +3,7 @@ import http from "node:http";
 import https from "node:https";
 import * as net from "node:net";
 import * as crypto from "node:crypto";
+import Mustache from "mustache";
 
 /**
  * Web server
@@ -47,15 +48,41 @@ export default class WebServer {
     public readonly connections = new Map<number, {req: string, time: number}>();
 
     /**
+     * Home page
+     * @readonly
+     */
+    public readonly homePage: Buffer;
+
+    /**
+     * frontend.js
+     * @readonly
+     */
+    public readonly frontendJs: Buffer;
+
+    /**
+     * Pre-processed home page
+     * @readonly
+     */
+    public get home(): string {
+        return Mustache.render(this.homePage.toString(), {
+           random: crypto.randomBytes(18).toString("base64").replaceAll("/", "").slice(0, 16),
+        });
+    }
+
+    /**
      * Instantiate a new web server
      * @param main Main instance
+     * @param homePage Home page
+     * @param frontendJs frontend.js
      * @param portHttp HTTP port
      * @param [portHttps=443] HTTPS port
      * @param [cert] SSL/TLS certificate
      * @param [key] SSL/TLS private key
      */
-    public constructor(main: Main, portHttp: number, portHttps = 443, cert?: Buffer, key?: Buffer) {
+    public constructor(main: Main, homePage: Buffer, frontendJs: Buffer, portHttp: number, portHttps = 443, cert?: Buffer, key?: Buffer) {
         this.main = main;
+        this.homePage = homePage;
+        this.frontendJs = frontendJs;
         this.ports = {http: portHttp, https: portHttps};
         this.cert = cert;
         this.key = key;
@@ -104,8 +131,14 @@ export default class WebServer {
      */
     public requestHandler(req: http.IncomingMessage, res: http.ServerResponse): void {
         if (req.url && req.url.startsWith("/s/")) return this.respondToSRequest(req, res);
-        res.writeHead(200, {"Content-Type": "text/html"});
-        res.end("Hello world!");
+        else if (req.url === "/frontend.js") {
+            res.writeHead(200, {"Content-Type": "text/javascript"});
+            res.end(this.frontendJs);
+        }
+        else {
+            res.writeHead(200, {"Content-Type": "text/html"});
+            res.end(this.home);
+        }
     }
 
     /**
