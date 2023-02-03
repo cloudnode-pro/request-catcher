@@ -34,7 +34,12 @@ export default class Main {
     public async start(): Promise<void> {
         const cert = this.config.tls?.cert ? await fs.readFile(this.config.tls.cert) : undefined;
         const key = this.config.tls?.key ? await fs.readFile(this.config.tls.key) : undefined;
-        this.webServer = new WebServer(this, await fs.readFile(path.join(Main.dir, "index.html")), await fs.readFile(path.join(Main.dir, "src", "frontend.js")), this.config.port, this.config.tls?.port, cert, key);
+        const staticFiles: Record<string, {type: string, data: Buffer}> = {
+            "/": {type: "text/html", data: await fs.readFile(path.join(Main.dir, "index.html"))},
+            "/frontend.js": {type: "text/javascript", data: await fs.readFile(path.join(Main.dir, "src", "frontend.js"))},
+            "/main.css": {type: "text/css", data: await fs.readFile(path.join(Main.dir, "css", "main.css"))},
+        };
+        this.webServer = new WebServer(this, staticFiles, this.config.port, this.config.tls?.port, cert, key);
     }
 
     /**

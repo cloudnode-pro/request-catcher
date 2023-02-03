@@ -110,3 +110,6 @@ dist
 
 # Project config
 config.json
+
+# Tailwind generated CSS
+css/main.css

@@ -49,41 +49,36 @@ export default class WebServer {
     public readonly connections = new Map<number, {req: string, time: number}>();
 
     /**
-     * Home page
+     * Static files
+     * @example `{"/path/to/file.txt": {type: "text/plain", data: Buffer.from("Hello, world!")} }`
      * @readonly
      */
-    public readonly homePage: Buffer;
-
-    /**
-     * frontend.js
-     * @readonly
-     */
-    public readonly frontendJs: Buffer;
+    public readonly staticFiles: Record<string, {type: string, data: Buffer}>;
 
     /**
      * Pre-processed home page
      * @readonly
      */
     public get home(): string {
-        return Mustache.render(this.homePage.toString(), {
+        const home = this.staticFiles["/"];
+        if (home) return Mustache.render(home.toString(), {
            random: crypto.randomBytes(18).toString("base64").replaceAll("/", "").slice(0, 16),
         });
+        return "UI not available";
     }
 
     /**
      * Instantiate a new web server
      * @param main Main instance
-     * @param homePage Home page
-     * @param frontendJs frontend.js
+     * @param staticFiles Static files
      * @param portHttp HTTP port
      * @param [portHttps=443] HTTPS port
      * @param [cert] SSL/TLS certificate
      * @param [key] SSL/TLS private key
      */
-    public constructor(main: Main, homePage: Buffer, frontendJs: Buffer, portHttp: number, portHttps = 443, cert?: Buffer, key?: Buffer) {
+    public constructor(main: Main, staticFiles: Record<string, {type: string, data: Buffer}>, portHttp: number, portHttps = 443, cert?: Buffer, key?: Buffer) {
         this.main = main;
-        this.homePage = homePage;
-        this.frontendJs = frontendJs;
+        this.staticFiles = staticFiles;
         this.ports = {http: portHttp, https: portHttps};
         this.cert = cert;
         this.key = key;
@@ -152,10 +147,15 @@ export default class WebServer {
      * @param res Response
      */
     public requestHandler(req: http.IncomingMessage, res: http.ServerResponse): void {
-        if (req.url && req.url.startsWith("/s/")) return this.respondToSRequest(req, res);
-        else if (req.url === "/frontend.js") {
-            res.writeHead(200, {"Content-Type": "text/javascript"});
-            res.end(this.frontendJs);
+        if (!req.url) {
+            res.writeHead(400, {"Content-Type": "text/plain"});
+            res.end("bad request");
+        }
+        else if (req.url.startsWith("/s/")) return this.respondToSRequest(req, res);
+        else if (req.url in this.staticFiles) {
+            const file = this.staticFiles[req.url!]!;
+            res.writeHead(200, {"Content-Type": file.type});
+            res.end(file.data);
         }
         else {
             res.writeHead(200, {"Content-Type": "text/html"});
