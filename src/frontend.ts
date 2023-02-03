@@ -72,6 +72,13 @@ document.addEventListener("DOMContentLoaded", () => {
         public readonly namespace: string;
 
         /**
+         * HTTP version
+         * @example 1.1
+         * @readonly
+         */
+        public readonly httpVersion: string;
+
+        /**
          * Instantiate a new request
          * @param id Request ID
          * @param data Raw data
@@ -82,8 +89,9 @@ document.addEventListener("DOMContentLoaded", () => {
          * @param serverIp IP address of the server (the back-end of this service)
          * @param date Date the request was received
          * @param namespace Namespace of this request
+         * @param httpVersion HTTP version
          */
-        public constructor(id: string, data: string, headers: string[], method: string, url: URL, senderIp: string, serverIp: string, date: Date, namespace: string) {
+        public constructor(id: string, data: string, headers: string[], method: string, url: URL, senderIp: string, serverIp: string, date: Date, namespace: string, httpVersion: string) {
             this.id = id;
             this.data = data;
             this.headers = headers;
@@ -93,6 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
             this.serverIp = serverIp;
             this.date = date;
             this.namespace = namespace;
+            this.httpVersion = httpVersion;
         }
 
         /**
@@ -134,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
          */
         public static fromJSON(json: string): Request {
             const obj = JSON.parse(json);
-            return new Request(obj.id, obj.data, obj.headers, obj.method, new URL(obj.url), obj.ip, obj.serverIp, new Date(obj.date), obj.namespace);
+            return new Request(obj.id, obj.data, obj.headers, obj.method, new URL(obj.url), obj.ip, obj.serverIp, new Date(obj.date), obj.namespace, obj.httpVersion);
         }
     }
 
