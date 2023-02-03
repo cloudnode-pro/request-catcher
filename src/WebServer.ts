@@ -104,6 +104,21 @@ export default class WebServer {
 
         this.servers.http.listen(portHttp);
         if (this.servers.https) this.servers.https.listen(portHttps);
+
+        this.websocketHandler();
+    }
+
+    /**
+     * Handle websocket connection
+     * @private
+     * @internal
+     */
+    private websocketHandler(): void {
+        this.servers.websocket.on("connection", socket => {
+            socket.on("namespace", (namespace: string) => {
+                socket.join(namespace);
+            });
+        });
     }
 
     /**
