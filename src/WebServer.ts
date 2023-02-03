@@ -3,6 +3,7 @@ import http from "node:http";
 import https from "node:https";
 import * as net from "node:net";
 import * as crypto from "node:crypto";
+import * as io from "socket.io";
 import Mustache from "mustache";
 
 /**
@@ -39,7 +40,7 @@ export default class WebServer {
      * Web servers
      * @readonly
      */
-    public readonly servers: {http: http.Server, https?: https.Server};
+    public readonly servers: {http: http.Server, https?: https.Server, websocket: io.Server};
 
     /**
      * Map socket remote port -> request ID
@@ -87,9 +88,15 @@ export default class WebServer {
         this.cert = cert;
         this.key = key;
 
-        this.servers = {
+        const srv = {
             http: http.createServer(this.requestHandler.bind(this)),
             https: cert && key ? https.createServer({cert, key}, this.requestHandler.bind(this)) : undefined
+        } as const;
+
+        this.servers = {
+            http: srv.http,
+            https: srv.https,
+            websocket: new io.Server(srv.https ?? srv.http)
         }
 
         this.servers.http.on("connection", this.connectionHandler.bind(this));
