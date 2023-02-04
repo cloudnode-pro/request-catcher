@@ -133,7 +133,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 ip: this.ip,
                 serverIp: this.serverIp,
                 date: this.date.toISOString(),
-                namespace: this.namespace
+                namespace: this.namespace,
+                httpVersion: this.httpVersion
             };
         }
 
