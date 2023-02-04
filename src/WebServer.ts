@@ -182,7 +182,7 @@ export default class WebServer {
             const namespace = req.url!.slice(3, req.url!.indexOf("?") === -1 ? undefined : req.url!.indexOf("?"));
             res.writeHead(204);
             res.end();
-            this.servers.websocket.to(namespace).emit("end", requestId, req.rawHeaders, req.httpVersion, req.method, req.url);
+            this.servers.websocket.to(namespace).emit("end", requestId, req.rawHeaders, req.httpVersion, req.method, req.url, req.socket.localPort === this.ports.https ? "https" : "http");
         }
     }
 

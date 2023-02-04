@@ -470,13 +470,13 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!req.data) req.data = [];
             req.data.push(packet);
         });
-        socket.on("end", (id: string, headers: string[], version: string, method: string, url: string) => {
+        socket.on("end", (id: string, headers: string[], version: string, method: string, url: string, protocol: string) => {
             const req = buildingRequests[id];
             if (!req) return;
             req.headers = headers;
             req.version = version;
             req.method = method;
-            req.url = location.protocol + "//" + location.host + url;
+            req.url = protocol + "://" + location.host + url;
             if ([req.id, req.senderIp, req.serverIp, req.serverPort, req.data].some(v => v === undefined)) return;
             const request = new Request(id, req.data!.map(d => new TextDecoder().decode(d)).join(""), req.headers, req.method, new URL(req.url), req.senderIp!, req.serverIp! + ":" + req.serverPort, new Date(), namespace, req.version);
             delete buildingRequests[id];
