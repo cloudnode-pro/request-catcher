@@ -195,7 +195,8 @@ export default class WebServer {
         let requestId: string;
         socket.on("data", (packet: Buffer) => {
             // first packet
-            if (socket.bytesRead === packet.length) {
+            const firstLine = packet.toString().split("\n")[0]!;
+            if (/[A-Z]+\s\/.*/.test(firstLine)) {
                 const parts = packet.toString().split(" ");
                 if (parts.length < 2) return;
                 const url = parts[1]!;
