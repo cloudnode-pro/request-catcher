@@ -204,7 +204,7 @@ export default class WebServer {
                     requestId = crypto.randomBytes(18).toString("base64").replace(/[^a-zA-Z0-9]/g, "").slice(0, 6);
                     const port = socket.remotePort;
                     if (port) this.connections.set(port, {req: requestId, time: Date.now()});
-                    this.servers.websocket.to(socketId).emit("request", requestId, socket.remoteAddress, socket.localAddress, socket.localPort);
+                    this.servers.websocket.to(socketId).emit("request", requestId, socketId, socket.remoteAddress, socket.localAddress, socket.localPort, new Date().toISOString());
                 }
             }
             if (socketId) {
