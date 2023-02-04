@@ -482,8 +482,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const request = new Request(id, req.data!.map(d => new TextDecoder().decode(d)).join(""), req.headers, req.method, new URL(req.url), req.senderIp!, req.serverIp! + ":" + req.serverPort, new Date(), namespace, req.version);
             delete buildingRequests[id];
             storage.add(request);
-            showScreen("main");
-            request.render();
+            if (storage.getForNamespace(namespace).length === 1) {
+                showScreen("main");
+                request.render();
+            }
         });
 
         // switch for toggling between parsed and raw headers
