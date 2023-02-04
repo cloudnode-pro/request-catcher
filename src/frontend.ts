@@ -1,17 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const showScreen = (screen: string) => {
-        const screenToShow = document.querySelector(`[data-screen="${screen}"]`);
-        if (screenToShow) {
-            const screens = document.querySelectorAll("[data-screen]");
-            for (const s of screens) {
-                s.classList.add("hidden");
-                s.classList.remove("flex");
-            }
-            screenToShow.classList.remove("hidden");
-            screenToShow.classList.add("flex");
-        }
-    }
-
     /**
      * Request
      * @class
@@ -382,6 +369,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         /**
+         * Get list of namespaces
+         */
+        public getNamespaces(): string[] {
+            return [...new Set(this.requests.map(r => r.namespace))];
+        }
+
+        /**
          * Delete request
          * @param id Request ID
          */
@@ -405,6 +399,14 @@ document.addEventListener("DOMContentLoaded", () => {
         public deleteOldest(n?: number): void {
             this.requests.splice(0, n ?? this.requests.length);
             this.save();
+        }
+
+        /**
+         * Delete namespace
+         * @param namespace Namespace
+         */
+        public deleteNamespace(namespace: string): void {
+            for (const request of this.getForNamespace(namespace)) this.delete(request.id);
         }
 
         /**
@@ -433,80 +435,182 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // determine which screen to show
-    if (location.pathname === "/") showScreen("home");
-    else {
-        const namespace = location.pathname.slice(1);
-        const sendUrl = location.protocol + "//" + location.host + "/s/" + namespace;
-        // Load request storage from local storage
-        const storage = localStorage.getItem("requests") ? RequestStorage.fromJSON(localStorage.getItem("requests")!) : RequestStorage.getInstance();
-        const requests = storage.getForNamespace(namespace);
-        if (requests.length === 0) {
-            showScreen("empty");
-            for (const link of document.querySelectorAll("[data-req-link]"))
-                link.setAttribute("href", sendUrl);
-            for (const url of document.querySelectorAll("[data-req-url], [data-req-link]")) {
-                (url.querySelector("code") ?? url).textContent = sendUrl;
+    /**
+     * Screens
+     * @class
+     */
+    class Screen {
+        /**
+         * Render a screen
+         * @param name Screen name
+         * @static
+         */
+        public static render(name: "home" | "empty" | "main"): void {
+            const screen = this.show(name);
+            if (!screen) return;
+            const namespace = getNamespace();
+            const sendUrl = location.protocol + "//" + location.host + "/s/" + namespace;
+            switch (name) {
+                case "home": {
+                    const namespacesList = screen.querySelector("[data-req-namespaces]");
+                    if (namespacesList) {
+                        for (const child of namespacesList.children) child.remove();
+                        
+                        const namespaces = storage.getNamespaces();
+                        if (namespaces.length === 0) {
+                            namespacesList.classList.add("hidden");
+                            namespacesList.classList.remove("flex");
+                        }
+                        else {
+                            namespacesList.classList.add("flex");
+                            namespacesList.classList.remove("hidden");
+
+                            for (const ns of namespaces) {
+                                const requests = storage.getForNamespace(ns).length;
+
+                                const item = document.createElement("div");
+                                item.classList.add("flex", "justify-between", "rounded-xl", "bg-slate-100", "p-3");
+
+                                const text = document.createElement("div");
+                                item.appendChild(text);
+
+                                const title = document.createElement("p");
+                                title.classList.add("text-slate-900", "font-medium");
+                                text.appendChild(title);
+
+                                const link = document.createElement("a");
+                                link.setAttribute("href", "/" + ns);
+                                link.textContent = ns;
+                                title.appendChild(link);
+
+                                const subtitle = document.createElement("p");
+                                subtitle.classList.add("text-sm", "text-slate-500");
+                                subtitle.textContent = requests + " request" + (requests === 1 ? "" : "s");
+                                text.appendChild(subtitle);
+
+                                const button = document.createElement("button");
+                                button.classList.add("text-slate-400", "hover:text-slate-500");
+                                button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6"><path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 013.878.512.75.75 0 11-.256 1.478l-.209-.035-1.005 13.07a3 3 0 01-2.991 2.77H8.084a3 3 0 01-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 01-.256-1.478A48.567 48.567 0 017.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 013.369 0c1.603.051 2.815 1.387 2.815 2.951zm-6.136-1.452a51.196 51.196 0 013.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 00-6 0v-.113c0-.794.609-1.428 1.364-1.452zm-.355 5.945a.75.75 0 10-1.5.058l.347 9a.75.75 0 101.499-.058l-.346-9zm5.48.058a.75.75 0 10-1.498-.058l-.347 9a.75.75 0 001.5.058l.345-9z" clip-rule="evenodd" /></svg>`;
+                                button.addEventListener("click", () => {
+                                    storage.deleteNamespace(ns);
+                                    item.remove();
+                                });
+                                item.appendChild(button);
+
+                                namespacesList.appendChild(item);
+                            }
+                        }
+                    }
+                    break;
+                }
+                case "empty": {
+                    for (const link of screen.querySelectorAll("[data-req-link]"))
+                        link.setAttribute("href", sendUrl);
+                    for (const url of screen.querySelectorAll("[data-req-url], [data-req-link]")) {
+                        (url.querySelector("code") ?? url).textContent = sendUrl;
+                    }
+                    break;
+                }
+                case "main": {
+                    const requests = storage.getForNamespace(namespace);
+                    if (requests.length === 0) Screen.render("empty");
+                    else requests[requests.length - 1]!.render();
+
+                    socket.emit("namespace", namespace);
+                    break;
+                }
             }
         }
-        else {
-            showScreen("main");
-            const lastRequest = requests[requests.length - 1]!;
-            lastRequest.render();
+
+        /**
+         * Get screen by name
+         * @param name Screen name
+         * @private
+         * @static
+         */
+        private static get(name: "home" | "empty" | "main"): Element | null {
+            return document.querySelector(`[data-screen="${name}"]`);
         }
 
-        // @ts-ignore
-        const socket = io();
-        console.log(namespace)
-        socket.emit("namespace", namespace);
-
-        const buildingRequests: Record<string, Partial<{id: string, senderIp: string, serverIp: string, serverPort: number, headers: string[], version: string, method: string, url: string, data: ArrayBuffer[]}>> = {};
-
-        socket.on("request", (id: string, senderIp?: string, serverIp?: string, serverPort?: number) => {
-            buildingRequests[id] = {id, senderIp, serverIp, serverPort};
-        });
-        socket.on("data", (id: string, packet: ArrayBuffer) => {
-            const req = buildingRequests[id];
-            if (!req) return;
-            if (!req.data) req.data = [];
-            req.data.push(packet);
-        });
-        socket.on("end", (id: string, headers: string[], version: string, method: string, url: string, protocol: string) => {
-            const req = buildingRequests[id];
-            if (!req) return;
-            req.headers = headers;
-            req.version = version;
-            req.method = method;
-            req.url = protocol + "://" + location.host + url;
-            if ([req.id, req.senderIp, req.serverIp, req.serverPort, req.data].some(v => v === undefined)) return;
-            const request = new Request(id, req.data!.map(d => new TextDecoder().decode(d)).join(""), req.headers, req.method, new URL(req.url), req.senderIp!, req.serverIp! + ":" + req.serverPort, new Date(), namespace, req.version);
-            delete buildingRequests[id];
-            storage.add(request);
-            if (storage.getForNamespace(namespace).length === 1) {
-                showScreen("main");
-                request.render();
+        /**
+         * Show screen
+         * @param name Screen name or element
+         * @private
+         * @static
+         */
+        private static show(name: "home" | "empty" | "main" | HTMLElement): Element | void {
+            const screenToShow = typeof name === "string" ? this.get(name) : name;
+            if (screenToShow) {
+                const screens = document.querySelectorAll("[data-screen]");
+                for (const s of screens) {
+                    s.classList.add("hidden");
+                    s.classList.remove("flex");
+                }
+                screenToShow.classList.remove("hidden");
+                screenToShow.classList.add("flex");
+                return screenToShow;
             }
-        });
-
-        // switch for toggling between parsed and raw headers
-        const switchHeaders = document.querySelector(`[data-req="switch-headers"]`);
-        const formattedHeaders = document.querySelector(`[data-req="formatted-headers"]`);
-        const rawHeaders = document.querySelector(`[data-req="raw-headers"]`);
-        if (switchHeaders && formattedHeaders && rawHeaders) {
-            const switchHeadersFn = () => {
-                if ((switchHeaders as HTMLInputElement).checked) {
-                    formattedHeaders.classList.add("hidden");
-                    rawHeaders.classList.remove("hidden");
-                }
-                else {
-                    formattedHeaders.classList.remove("hidden");
-                    rawHeaders.classList.add("hidden");
-                }
-            };
-            switchHeaders.addEventListener("change", () => {
-                switchHeadersFn();
-            });
-            switchHeadersFn();
         }
     }
+
+    /**
+     * Get namespace from URL
+     */
+    const getNamespace = (): string => {
+        return location.pathname.slice(1);
+    }
+
+        // @ts-ignore
+    const socket = io();
+    const storage = localStorage.getItem("requests") ? RequestStorage.fromJSON(localStorage.getItem("requests")!) : RequestStorage.getInstance();
+
+    const buildingRequests: Record<string, Partial<{id: string, namespace: string, senderIp: string, serverIp: string, serverPort: number, date: Date, headers: string[], version: string, method: string, url: string, data: ArrayBuffer[]}>> = {};
+
+    socket.on("request", (id: string, namespace: string, senderIp: string, serverIp: string, serverPort: number, date: string) => {
+        buildingRequests[id] = {id, namespace, senderIp, serverIp, serverPort, date: new Date(date)};
+    });
+    socket.on("data", (id: string, packet: ArrayBuffer) => {
+        const req = buildingRequests[id];
+        if (!req) return;
+        if (!req.data) req.data = [];
+        req.data.push(packet);
+    });
+    socket.on("end", (id: string, headers: string[], version: string, method: string, url: string, protocol: string) => {
+        const req = buildingRequests[id];
+        if (!req) return;
+        req.headers = headers;
+        req.version = version;
+        req.method = method;
+        req.url = protocol + "://" + location.host + url;
+        if ([req.id, req.namespace, req.senderIp, req.serverIp, req.serverPort, req.date, req.data].some(v => v === undefined)) return;
+        const request = new Request(id, req.data!.map(d => new TextDecoder().decode(d)).join(""), req.headers, req.method, new URL(req.url), req.senderIp!, req.serverIp! + ":" + req.serverPort, req.date!, req.namespace!, req.version);
+        delete buildingRequests[id];
+        storage.add(request);
+        if (storage.getForNamespace(req.namespace!).length === 1) Screen.render("main");
+    });
+
+    // switch for toggling between parsed and raw headers
+    const switchHeaders = document.querySelector(`[data-req="switch-headers"]`);
+    const formattedHeaders = document.querySelector(`[data-req="formatted-headers"]`);
+    const rawHeaders = document.querySelector(`[data-req="raw-headers"]`);
+    if (switchHeaders && formattedHeaders && rawHeaders) {
+        const switchHeadersFn = () => {
+            if ((switchHeaders as HTMLInputElement).checked) {
+                formattedHeaders.classList.add("hidden");
+                rawHeaders.classList.remove("hidden");
+            }
+            else {
+                formattedHeaders.classList.remove("hidden");
+                rawHeaders.classList.add("hidden");
+            }
+        };
+        switchHeaders.addEventListener("change", () => {
+            switchHeadersFn();
+        });
+        switchHeadersFn();
+    }
+
+    // determine which screen to show
+    if (location.pathname === "/") Screen.render("home");
+    else Screen.render("main");
 });
