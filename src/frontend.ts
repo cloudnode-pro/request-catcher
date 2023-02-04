@@ -372,7 +372,7 @@ document.addEventListener("DOMContentLoaded", () => {
          * Get list of namespaces
          */
         public getNamespaces(): string[] {
-            return [...new Set(this.requests.map(r => r.namespace))];
+            return [...new Set(this.requests.map(r => r.namespace))].reverse();
         }
 
         /**
