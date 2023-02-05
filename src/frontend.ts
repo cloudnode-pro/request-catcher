@@ -759,7 +759,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const list = document.querySelector(`[data-requests]`);
             if (!list) return;
             const namespace = getNamespace();
-            if (namespace.length <= 0) return;
+            if (!namespace) return;
             const requests = this.getForNamespace(namespace).sort((a, b) => b.date.getTime() - a.date.getTime());
             if (requests.length <= 0) return Screen.render("empty");
             while (list.firstChild) list.removeChild(list.firstChild);
@@ -986,7 +986,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const request = new Request(id, req.data!, req.headers, req.method, new URL(req.url), req.senderIp!, req.serverIp! + ":" + req.serverPort, req.date!, req.namespace!, req.version);
         delete buildingRequests[id];
         storage.add(request);
-        if (storage.getForNamespace(req.namespace!).length === 1) Screen.render("main");
+        if (storage.getForNamespace(req.namespace!).length === 1) renderScreen();
     });
 
     // switch for toggling between parsed and raw headers
