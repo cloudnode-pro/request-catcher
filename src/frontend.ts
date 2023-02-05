@@ -208,7 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const formattedUrl = document.querySelector(`[data-req="formatted-url"]`);
             if (formattedUrl) {
-                for (const child of formattedUrl.children) child.remove();
+                while (formattedUrl.firstChild) formattedUrl.removeChild(formattedUrl.firstChild);
                 const protocol = document.createElement("span");
                 protocol.classList.add("text-slate-500");
                 protocol.textContent = this.url.protocol + "//";
@@ -267,7 +267,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const searchParams = Object.fromEntries(this.url.searchParams);
                 if (Object.keys(searchParams).length > 0) {
                     formattedQuery.classList.remove("hidden");
-                    for (const child of formattedQuery.children) child.remove();
+                    while (formattedQuery.firstChild) formattedQuery.removeChild(formattedQuery.firstChild);
                     for (const [key, value] of Object.entries(searchParams)) {
                         // <li><span class="text-blue-600 mr-1">query:</span> <span class="text-slate-900">data</span></li>
                         const li = document.createElement("li");
@@ -296,7 +296,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const formattedHeaders = document.querySelector(`[data-req="formatted-headers"]`);
             if (formattedHeaders) {
-                //this.headers = ["header-name", "value", "header-name", "value", ...]
                 const headerNames = this.headers.filter((_, i) => i % 2 === 0);
                 const headerValues = this.headers.filter((_, i) => i % 2 === 1);
                 const headers: [string, string][] = [];
@@ -304,8 +303,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 for (const i in headerNames) headers.push([capitalise(headerNames[i]!), headerValues[i]!]);
                 const sortedHeaders = headers.sort((a, b) => a[0].localeCompare(b[0]));
 
-                // <li><span class="text-blue-600 mr-1">Host:</span> <span class="text-slate-900">req.cldn.pro</span></li>
-                for (const child of formattedHeaders.children) child.remove();
+                while (formattedHeaders.firstChild) formattedHeaders.removeChild(formattedHeaders.firstChild);
                 for (const [key, value] of sortedHeaders) {
                     const li = document.createElement("li");
                     const keySpan = document.createElement("span");
@@ -460,7 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 case "home": {
                     const namespacesList = screen.querySelector("[data-req-namespaces]");
                     if (namespacesList) {
-                        for (const child of namespacesList.children) child.remove();
+                        while (namespacesList.firstChild) namespacesList.removeChild(namespacesList.firstChild);
                         
                         const namespaces = storage.getNamespaces();
                         if (namespaces.length === 0) {
