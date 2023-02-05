@@ -1286,8 +1286,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const buttonForward = document.createElement("button");
         buttonForward.type = "submit";
         buttonForward.setAttribute("form", "forward");
-        buttonForward.classList.add("inline-flex", "w-full", "justify-center", "rounded-md", "border", "border-transparent", "bg-blue-600", "px-4", "py-2", "text-base", "font-medium", "text-white", "shadow-sm", "hover:bg-blue-700", "focus:outline-none", "focus:ring-2", "focus:ring-blue-500", "focus:ring-offset-2", "focus:ring-offset-slate-50", "sm:ml-3", "sm:w-auto", "sm:text-sm");
-        buttonForward.textContent = "Forward";
+        buttonForward.classList.add("inline-flex", "w-full", "justify-center", "rounded-md", "border", "border-transparent", "bg-blue-600", "px-4", "py-2", "text-base", "font-medium", "text-white", "shadow-sm", "hover:bg-blue-700", "focus:outline-none", "focus:ring-2", "focus:ring-blue-500", "focus:ring-offset-2", "focus:ring-offset-slate-50", "sm:ml-3", "sm:w-auto", "sm:text-sm", "disabled:relative", "disabled:overflow-hidden", "disabled:pointer-events-none", "group");
+        buttonForward.innerHTML = `Forward<div class="hidden absolute bg-inherit inset-0 group-disabled:flex"><div class="w-5 h-5 border-2 border-transparent border-t-white border-r-white border-opacity-80 rounded-full m-auto animate-spin"></div></div>`;
         modal.footer.appendChild(buttonForward);
 
         const buttonCancel = document.createElement("button");
@@ -1297,9 +1297,15 @@ document.addEventListener("DOMContentLoaded", () => {
         buttonCancel.addEventListener("click", () => modal.hide());
         modal.footer.appendChild(buttonCancel);
 
-        form.addEventListener("submit", (e) => {
+        form.addEventListener("submit", async (e) => {
             e.preventDefault();
-            // TODO: forward request
+            const request = Request.currentRequest;
+            if (!request) return;
+            const url = urlInput.value;
+            buttonForward.disabled = true;
+            await request.forward(url);
+            buttonForward.disabled = false;
+            modal.hide();
         });
 
         forwardButton.addEventListener("click", () => {
