@@ -324,6 +324,84 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const rawHeaders = document.querySelector(`[data-req="raw-headers"]`);
             if (rawHeaders) rawHeaders.textContent = this.rawHeaders;
+
+            // body
+            const body = document.querySelector(`[data-req="body"]`);
+            if (body) {
+                while (body.firstChild) body.removeChild(body.firstChild);
+                if (this.body) {
+                    const head = document.createElement("div");
+                    head.classList.add("flex", "items-center", "justify-between", "bg-slate-100", "p-2");
+                    body.appendChild(head);
+
+                    const p = document.createElement("p");
+                    p.classList.add("text-sm", "leading-none", "text-slate-900");
+                    const contentTypeHeaderIndex = this.headers.findIndex(h => h.toLowerCase() === "content-type");
+                    const contentType = contentTypeHeaderIndex !== -1 ? this.headers[contentTypeHeaderIndex + 1] : "application/octet-stream";
+
+                    /** @see https://stackoverflow.com/a/20732091/7089726 */
+                    function humanFileSize(size: number): string {
+                        const i = size == 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
+                        return Number((size / Math.pow(1000, i)).toFixed(2)) + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+                    }
+
+                    p.innerHTML = `${contentType} <span aria-hidden="true">&middot;</span> ${humanFileSize(new TextEncoder().encode(this.body).byteLength)}`;
+                    head.appendChild(p);
+
+                    const div = document.createElement("div");
+                    head.appendChild(div);
+
+                    const label = document.createElement("label");
+                    label.classList.add("flex", "items-center", "space-x-2");
+                    div.appendChild(label);
+
+                    const span = document.createElement("span");
+                    span.classList.add("text-sm", "text-slate-900");
+                    span.textContent = "Raw";
+                    label.appendChild(span);
+
+                    const input = document.createElement("input");
+                    input.type = "checkbox";
+                    input.classList.add("peer", "sr-only");
+                    label.appendChild(input);
+
+                    const switchDiv = document.createElement("div");
+                    switchDiv.classList.add("before:transition", "relative", "inline-flex", "h-5", "w-10", "flex-shrink-0", "cursor-pointer", "rounded-full", "border-2", "border-transparent", "bg-slate-200", "transition-colors", "duration-200", "ease-in-out", "before:block", "before:h-4", "before:w-4", "before:translate-x-0", "before:transform", "before:rounded-full", "before:bg-white", "before:shadow", "before:ring-0", "before:duration-200", "before:ease-in-out", "before:content-['']", "peer-checked:bg-blue-600", "peer-checked:before:translate-x-5");
+                    label.appendChild(switchDiv);
+
+                    const container = document.createElement("div");
+                    body.appendChild(container);
+
+                    const formatted = document.createElement("div");
+                    formatted.classList.add("hidden");
+                    container.appendChild(formatted);
+
+                    const raw = document.createElement("div");
+                    container.appendChild(raw);
+
+                    const pre = document.createElement("pre");
+                    pre.classList.add("w-full", "border-0", "py-3", "px-4", "text-sm", "overflow-auto", "text-slate-900");
+                    raw.appendChild(pre);
+
+                    const code = document.createElement("code");
+                    code.textContent = this.body;
+                    pre.appendChild(code);
+                }
+                else {
+                    const div = document.createElement("div");
+                    div.classList.add("flex", "h-64", "bg-slate-50");
+                    body.appendChild(div);
+
+                    const p = document.createElement("p");
+                    p.classList.add("m-auto", "text-slate-500", "text-lg", "sm:text-2xl");
+                    p.textContent = "No payload for this request";
+                    div.appendChild(p);
+                }
+            }
+
+            // raw
+            const raw = document.querySelector(`[data-req="raw"]`);
+            if (raw) raw.textContent = this.data;
         }
     }
 
