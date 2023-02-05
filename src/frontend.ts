@@ -567,6 +567,11 @@ document.addEventListener("DOMContentLoaded", () => {
                             }
                         }
                     }
+
+                    const link = screen.querySelector("[data-req-random]");
+                    if (link) {
+                        link.setAttribute("href", "/" + Array.from(crypto.getRandomValues(new Uint8Array(16))).map(n => "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[n % 62]).join(""));
+                    }
                     break;
                 }
                 case "empty": {

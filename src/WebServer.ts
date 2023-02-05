@@ -4,7 +4,6 @@ import https from "node:https";
 import * as net from "node:net";
 import * as crypto from "node:crypto";
 import * as io from "socket.io";
-import Mustache from "mustache";
 
 /**
  * Web server
@@ -59,11 +58,9 @@ export default class WebServer {
      * Pre-processed home page
      * @readonly
      */
-    public get home(): string {
+    public get home(): Buffer | string {
         const home = this.staticFiles["/"];
-        if (home) return Mustache.render(home.data.toString(), {
-           random: crypto.randomBytes(18).toString("base64").replaceAll("/", "").slice(0, 16),
-        });
+        if (home) return home.data;
         return "UI not available";
     }
 
