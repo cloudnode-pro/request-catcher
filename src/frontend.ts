@@ -918,6 +918,12 @@ document.addEventListener("DOMContentLoaded", () => {
                if (e.target === flex) this.hide();
             });
 
+            this.modal.addEventListener("keydown", (e: KeyboardEvent) => {
+                if (e.key !== "Escape" || !this.open) return;
+                e.preventDefault();
+                this.hide();
+            });
+
             // trap focus
             this.panel.addEventListener("keydown", (e: KeyboardEvent) => {
                 if (e.key !== "Tab" || !this.open) return;
