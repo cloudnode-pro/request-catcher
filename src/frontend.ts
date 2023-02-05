@@ -794,6 +794,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 separator.textContent = "·";
                 subtitle.appendChild(separator);
 
+                subtitle.appendChild(document.createTextNode(" "));
+
                 const date = document.createElement("time");
                 date.setAttribute("datetime", request.date.toISOString());
                 date.textContent = request.date.toLocaleDateString(navigator.language, {month: 'short', day: 'numeric', year: 'numeric', hour: "numeric", minute: "numeric"});
