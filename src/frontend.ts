@@ -635,6 +635,30 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         /**
+         * Forward request to new URL
+         * @param url URL
+         */
+        public async forward(url: string): Promise<Response> {
+            const headers = new Headers();
+            for (const [key, value] of this.headersEntries) {
+                if (key.toLowerCase().startsWith("proxy-") || key.toLowerCase().startsWith("sec-") ||
+                    ["accept-charset", "accept-encoding", "access-control-request-headers", "access-control-request-method", "connection", "content-length", "cookie", "date", "dnt", "expect", "host", "keep-alive", "origin", "permissions-policy", "referer", "te", "trailer", "transfer-encoding", "upgrade", "via"].includes(key.toLowerCase())
+                ) continue;
+                headers.append(key, value);
+            }
+            const options: RequestInit = {
+                method: this.method,
+                headers,
+                mode: "cors",
+                cache: "no-cache",
+                redirect: "follow",
+                referrerPolicy: "no-referrer"
+            };
+            if (this.body.byteLength > 0) options.body = this.body;
+            return await fetch(url, options);
+        }
+
+        /**
          * Currently rendered request
          * @private
          * @static
