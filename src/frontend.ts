@@ -1259,6 +1259,7 @@ document.addEventListener("DOMContentLoaded", () => {
         urlContainer.appendChild(urlInput);
 
         const checkBoxContainer = document.createElement("div");
+        checkBoxContainer.classList.add("hidden"); // TODO: forwarding future requests not implemented
         checkBoxContainer.classList.add("flex", "items-start");
         form.appendChild(checkBoxContainer);
         const checkBoxSubContainer = document.createElement("div");
