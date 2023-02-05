@@ -420,6 +420,21 @@ document.addEventListener("DOMContentLoaded", () => {
             const raw = document.querySelector(`[data-req="raw"]`);
             if (raw) raw.textContent = this.data;
         }
+
+        /**
+         * Currently rendered request
+         * @private
+         * @static
+         */
+        static #currentRequest: Request | undefined;
+
+        /**
+         * Currently rendered request
+         * @readonly
+         */
+        public static get currentRequest(): Request | undefined {
+            return this.#currentRequest;
+        }
     }
 
     /**
