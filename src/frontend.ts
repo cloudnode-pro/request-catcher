@@ -541,6 +541,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 link.setAttribute("href", "/" + ns);
                                 link.textContent = ns;
                                 title.appendChild(link);
+                                usePushState(link);
 
                                 const subtitle = document.createElement("p");
                                 subtitle.classList.add("text-sm", "text-slate-500");
@@ -691,6 +692,22 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // determine which screen to show
-    if (location.pathname === "/") Screen.render("home");
-    else Screen.render("main");
+    const renderScreen = () => {
+        if (location.pathname === "/") Screen.render("home");
+        else Screen.render("main");
+    }
+
+    renderScreen();
+
+    // make link work with pushState
+    const usePushState = (a: HTMLAnchorElement) => {
+        if (a.target === "_blank" || !a.href.startsWith(location.origin)) return;
+        a.addEventListener("click", e => {
+            e.preventDefault();
+            history.pushState({}, "", a.href);
+            renderScreen();
+        });
+    }
+
+    for (const a of document.querySelectorAll("a[href]") as NodeListOf<HTMLAnchorElement>) usePushState(a);
 });
