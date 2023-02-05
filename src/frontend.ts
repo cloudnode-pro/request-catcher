@@ -375,6 +375,7 @@ document.addEventListener("DOMContentLoaded", () => {
          * Render request as HTML on the page
          */
         public render(): void {
+            Request.#currentRequest = this;
             const formattedMethod = document.querySelector(`[data-req="formatted-method"]`);
             if (formattedMethod) {
                 formattedMethod.textContent = this.method;
@@ -534,8 +535,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         return Number((size / Math.pow(1000, i)).toFixed(2)) + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
                     }
 
-                    p.innerHTML = `${contentType} <span aria-hidden="true">&middot;</span> ${humanFileSize(new TextEncoder().encode(this.body).byteLength)}`;
+                    p.innerHTML = `${contentType} <span aria-hidden="true">&middot;</span> ${humanFileSize(this.body.byteLength)}`;
                     head.appendChild(p);
+
+                    const formattedBody = this.formatBody();
 
                     const div = document.createElement("div");
                     head.appendChild(div);
@@ -555,7 +558,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     label.appendChild(input);
 
                     const switchDiv = document.createElement("div");
-                    switchDiv.classList.add("before:transition", "relative", "inline-flex", "h-5", "w-10", "flex-shrink-0", "cursor-pointer", "rounded-full", "border-2", "border-transparent", "bg-slate-200", "transition-colors", "duration-200", "ease-in-out", "before:block", "before:h-4", "before:w-4", "before:translate-x-0", "before:transform", "before:rounded-full", "before:bg-white", "before:shadow", "before:ring-0", "before:duration-200", "before:ease-in-out", "before:content-['']", "peer-checked:bg-blue-600", "peer-checked:before:translate-x-5");
+                    switchDiv.classList.add("before:transition", "relative", "inline-flex", "h-5", "w-10", "flex-shrink-0", "cursor-pointer", "rounded-full", "border-2", "border-transparent", "bg-slate-200", "transition-colors", "duration-200", "ease-in-out", "before:block", "before:h-4", "before:w-4", "before:translate-x-0", "before:transform", "before:rounded-full", "before:bg-white", "before:shadow", "before:ring-0", "before:duration-200", "before:ease-in-out", "before:content-['']", "peer-checked:bg-blue-600", "peer-checked:before:translate-x-5", "peer-disabled:opacity-50");
                     label.appendChild(switchDiv);
 
                     const container = document.createElement("div");
@@ -565,7 +568,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     formatted.classList.add("hidden");
                     container.appendChild(formatted);
 
+                    if (formattedBody) {
+                        formatted.appendChild(formattedBody);
+                        // @ts-ignore
+                        Prism.highlightAllUnder(formatted);
+                    }
+
                     const raw = document.createElement("div");
+                    if (formattedBody) raw.classList.add("hidden");
                     container.appendChild(raw);
 
                     const pre = document.createElement("pre");
@@ -573,8 +583,28 @@ document.addEventListener("DOMContentLoaded", () => {
                     raw.appendChild(pre);
 
                     const code = document.createElement("code");
-                    code.textContent = this.body;
+                    code.textContent = String.fromCharCode(...new Uint8Array(this.body));
                     pre.appendChild(code);
+
+                    const switchBody = () => {
+                        if (input.checked) {
+                            formatted.classList.add("hidden");
+                            raw.classList.remove("hidden");
+                        }
+                        else {
+                            raw.classList.add("hidden");
+                            formatted.classList.remove("hidden");
+                        }
+                    }
+
+                    if (formattedBody === undefined) {
+                        input.disabled = true;
+                        input.checked = true;
+                    }
+                    else {
+                        input.addEventListener("change", switchBody);
+                        switchBody();
+                    }
                 }
                 else {
                     const div = document.createElement("div");
