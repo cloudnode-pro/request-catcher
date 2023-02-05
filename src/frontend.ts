@@ -928,7 +928,7 @@ document.addEventListener("DOMContentLoaded", () => {
             this.panel.addEventListener("keydown", (e: KeyboardEvent) => {
                 if (e.key !== "Tab" || !this.open) return;
                 const focusable = [...this.panel.querySelectorAll("a[href], button, textarea, input:not([type=hidden]), select, [tabindex]:not([tabindex='-1'])")].filter(el => !el.hasAttribute("disabled") && ((el as HTMLElement).offsetWidth > 0 || (el as HTMLElement).offsetHeight > 0)) as HTMLElement[];
-                if (focusable.length === 0) return;
+                if (focusable.length >= 2) this.focusDummy.remove();
                 const firstFocusable = focusable[0]!;
                 const lastFocusable = focusable[focusable.length - 1]!;
 
