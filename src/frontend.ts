@@ -12,9 +12,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         /**
          * Raw data
+         * @private
+         */
+        #data: Uint8Array;
+
+        /**
+         * Raw data
          * @readonly
          */
-        public readonly data: string;
+        public get data(): Uint8Array {
+            return this.#data;
+        }
 
         /**
          * Headers
@@ -78,9 +86,9 @@ document.addEventListener("DOMContentLoaded", () => {
          * @param namespace Namespace of this request
          * @param httpVersion HTTP version
          */
-        public constructor(id: string, data: string, headers: string[], method: string, url: URL, senderIp: string, serverIp: string, date: Date, namespace: string, httpVersion: string) {
+        public constructor(id: string, data: Uint8Array, headers: string[], method: string, url: URL, senderIp: string, serverIp: string, date: Date, namespace: string, httpVersion: string) {
             this.id = id;
-            this.data = data;
+            this.#data = data;
             this.headers = headers;
             this.method = method;
             this.url = url;
@@ -104,16 +112,16 @@ document.addEventListener("DOMContentLoaded", () => {
          * @readonly
          */
         public get rawHeaders(): string {
-            return this.data.split("\r\n\r\n")[0]!;
+            return String.fromCharCode(...this.data).split("\r\n\r\n")[0]!;
         }
 
         /**
          * Format request as plain object
          */
-        public toObject(): Record<string, any> {
+        public toObject(): Record<string, string | number | boolean | (string | number | boolean)[]> {
             return {
                 id: this.id,
-                data: this.data,
+                data: arrayBufferToBase64(this.data),
                 headers: this.headers,
                 method: this.method,
                 url: this.url.toString(),
@@ -139,7 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
          */
         public static fromJSON(json: string): Request {
             const obj = JSON.parse(json);
-            return new Request(obj.id, obj.data, obj.headers, obj.method, new URL(obj.url), obj.ip, obj.serverIp, new Date(obj.date), obj.namespace, obj.httpVersion);
+            return new Request(obj.id, base64ToArrayBuffer(obj.data), obj.headers, obj.method, new URL(obj.url), obj.ip, obj.serverIp, new Date(obj.date), obj.namespace, obj.httpVersion);
         }
 
         /**
@@ -716,7 +724,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const socket = io();
     const storage = localStorage.getItem("requests") ? RequestStorage.fromJSON(localStorage.getItem("requests")!) : RequestStorage.getInstance();
 
-    const buildingRequests: Record<string, Partial<{id: string, namespace: string, senderIp: string, serverIp: string, serverPort: number, date: Date, headers: string[], version: string, method: string, url: string, data: ArrayBuffer[]}>> = {};
+    const buildingRequests: Record<string, Partial<{id: string, namespace: string, senderIp: string, serverIp: string, serverPort: number, date: Date, headers: string[], version: string, method: string, url: string, data: Uint8Array}>> = {};
 
     socket.on("request", (id: string, namespace: string, senderIp: string, serverIp: string, serverPort: number, date: string) => {
         buildingRequests[id] = {id, namespace, senderIp, serverIp, serverPort, date: new Date(date)};
@@ -724,8 +732,8 @@ document.addEventListener("DOMContentLoaded", () => {
     socket.on("data", (id: string, packet: ArrayBuffer) => {
         const req = buildingRequests[id];
         if (!req) return;
-        if (!req.data) req.data = [];
-        req.data.push(packet);
+        else if (!req.data) req.data = new Uint8Array(packet);
+        else req.data = mergeUint8Arrays(req.data, packet);
     });
     socket.on("end", (id: string, headers: string[], version: string, method: string, url: string, protocol: string) => {
         const req = buildingRequests[id];
@@ -735,7 +743,7 @@ document.addEventListener("DOMContentLoaded", () => {
         req.method = method;
         req.url = protocol + "://" + location.host + url;
         if ([req.id, req.namespace, req.senderIp, req.serverIp, req.serverPort, req.date, req.data].some(v => v === undefined)) return;
-        const request = new Request(id, req.data!.map(d => new TextDecoder().decode(d)).join(""), req.headers, req.method, new URL(req.url), req.senderIp!, req.serverIp! + ":" + req.serverPort, req.date!, req.namespace!, req.version);
+        const request = new Request(id, req.data!, req.headers, req.method, new URL(req.url), req.senderIp!, req.serverIp! + ":" + req.serverPort, req.date!, req.namespace!, req.version);
         delete buildingRequests[id];
         storage.add(request);
         if (storage.getForNamespace(req.namespace!).length === 1) Screen.render("main");
@@ -834,5 +842,96 @@ document.addEventListener("DOMContentLoaded", () => {
             openTab(tabActivate.dataset.tabOpen!);
             tabActivate.removeAttribute("data-tab-activate");
         }
+    }
+
+    /**
+     * Convert Uint8Array to base64 encoded string
+     *
+     * Based on https://gist.github.com/jonleighton/958841
+     * @param bytes
+     * @returns base64 encoded string
+     */
+    function arrayBufferToBase64(buffer: Uint8Array | ArrayBuffer): string {
+        let result = "";
+        const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        const bytes = new Uint8Array(buffer);
+        const length = bytes.byteLength - bytes.byteLength % 3;
+
+        let a: number, b: number, c: number, d: number;
+        let chunk: number;
+
+        // loop bytes in chunks of 3
+        for (let i = 0; i < length; i += 3) {
+            chunk = (bytes[i]! << 16) | (bytes[i + 1]! << 8) | bytes[i + 2]!;
+            a = (chunk & 16515072) >> 18; // 16515072 = (2^6 - 1) << 18
+            b = (chunk & 258048) >> 12; // 258048 = (2^6 - 1) << 12
+            c = (chunk & 4032) >> 6; // 4032 = (2^6 - 1) << 6
+            d = chunk & 63; // 63 = 2^6 - 1
+
+            result += characters[a]! + characters[b] + characters[c] + characters[d];
+        }
+
+        // remaining bytes and padding
+        if (bytes.byteLength % 3 === 1) {
+            chunk = bytes[length]!;
+            a = (chunk & 252) >> 2; // 252 = (2^6 - 1) << 2
+            b = (chunk & 3) << 4; // 3 = 2^2 - 1
+            result += characters[a]! + characters[b] + "==";
+        }
+        else if (bytes.byteLength % 3 === 2) {
+            chunk = (bytes[length]! << 8) | bytes[length + 1]!;
+            a = (chunk & 64512) >> 10; // 64512 = (2^6 - 1) << 10
+            b = (chunk & 1008) >> 4; // 1008 = (2^6 - 1) << 4
+            c = (chunk & 15) << 2; // 15 = 2^4 - 1
+            result += characters[a]! + characters[b] + characters[c] + "=";
+        }
+
+        return result;
+    }
+
+    /**
+     * Convert base64 encoded string to Uint8Array
+     *
+     * Based on https://github.com/danguer/blog-examples/blob/master/js/base64-binary.js
+     * @param base64
+     * @returns Uint8Array
+     */
+    function base64ToArrayBuffer(base64: string): Uint8Array {
+        // remove padding characters
+        base64 = base64.replace(/[^A-Za-z\d+\/]/g, "");
+
+        const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        const length = Math.floor((base64.length / 4) * 3);
+        const uint8 = new Uint8Array(length);
+
+        // loop bytes in chunks of 3
+        for (let i = 0, j = 0; i < length; i += 3) {
+            const a = characters.indexOf(base64[j++]!);
+            const b = characters.indexOf(base64[j++]!);
+            const c = characters.indexOf(base64[j++]!);
+            const d = characters.indexOf(base64[j++]!);
+
+            const chr1 = (a << 2) | (b >> 4);
+            const chr2 = ((b & 15) << 4) | (c >> 2);
+            const chr3 = ((c & 3) << 6) | d;
+
+            uint8[i] = chr1;
+            if (c !== 64) uint8[i + 1] = chr2;
+            if (d !== 64) uint8[i + 2] = chr3;
+        }
+
+        return uint8;
+    }
+
+    /**
+     * Merge Uint8Arrays
+     * @param array1
+     * @param array2
+     * @returns merged array
+     */
+    function mergeUint8Arrays(array1: Uint8Array | ArrayBuffer, array2: Uint8Array | ArrayBuffer): Uint8Array {
+        const a1: number[] = Array.from(new Uint8Array(array1));
+        const a2: number[] = Array.from(new Uint8Array(array2));
+        return new Uint8Array(a1.concat(a2));
     }
 });
