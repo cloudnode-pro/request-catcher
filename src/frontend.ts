@@ -425,6 +425,58 @@ document.addEventListener("DOMContentLoaded", () => {
          */
         public save(): void {
             localStorage.setItem("requests", this.toJSON());
+            this.renderList();
+        }
+
+        /**
+         * Render list of requests on `main` screen
+         */
+        public renderList(): void {
+            const list = document.querySelector(`[data-requests]`);
+            if (!list) return;
+            const namespace = getNamespace();
+            if (namespace.length <= 0) return;
+            const requests = this.getForNamespace(namespace).sort((a, b) => b.date.getTime() - a.date.getTime());
+            if (requests.length <= 0) return Screen.render("empty");
+            while (list.firstChild) list.removeChild(list.firstChild);
+            for (const request of requests) {
+                const div = document.createElement("div");
+                div.classList.add("cursor-pointer", "p-3", "hover:bg-slate-100");
+                div.addEventListener("click", () => request.render());
+
+                const title = document.createElement("p");
+                title.classList.add("flex", "items-center", "space-x-2");
+                div.appendChild(title);
+
+                const method = document.createElement("span");
+                const methodColours: {bg: string, text: string} = Request.methodColours[request.method] ?? Request.methodColours.unknown!;
+                method.classList.add("rounded-full", methodColours.bg, "px-3", "py-0.5", "text-sm", "font-medium", methodColours.text);
+                method.textContent = request.method;
+                title.appendChild(method);
+
+                const ip = document.createElement("span");
+                ip.classList.add("font-medium", "text-slate-700");
+                ip.textContent = request.ip.startsWith("::ffff:") ? request.ip.slice(7) : request.ip;
+                title.appendChild(ip);
+
+                const subtitle = document.createElement("p");
+                subtitle.classList.add("mt-1", "text-sm", "text-slate-500");
+                div.appendChild(subtitle);
+
+                subtitle.appendChild(document.createTextNode(`#${request.id} `));
+
+                const separator = document.createElement("span");
+                separator.setAttribute("aria-hidden", "true");
+                separator.textContent = "·";
+                subtitle.appendChild(separator);
+
+                const date = document.createElement("time");
+                date.setAttribute("datetime", request.date.toISOString());
+                date.textContent = request.date.toLocaleDateString(navigator.language, {month: 'short', day: 'numeric', year: 'numeric', hour: "numeric", minute: "numeric"});
+                subtitle.appendChild(date);
+
+                list.appendChild(div);
+            }
         }
 
         /**
@@ -526,6 +578,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     const requests = storage.getForNamespace(namespace);
                     if (requests.length === 0) Screen.render("empty");
                     else requests[requests.length - 1]!.render();
+
+                    storage.renderList();
 
                     socket.emit("namespace", namespace);
                     break;
