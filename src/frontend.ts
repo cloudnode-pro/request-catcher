@@ -418,7 +418,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // raw
             const raw = document.querySelector(`[data-req="raw"]`);
-            if (raw) raw.textContent = this.data;
+            if (raw) raw.textContent = String.fromCharCode(...this.data);
         }
 
         /**
