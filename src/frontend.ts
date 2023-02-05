@@ -710,4 +710,51 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     for (const a of document.querySelectorAll("a[href]") as NodeListOf<HTMLAnchorElement>) usePushState(a);
+
+    // tabs
+    const tabContainers = document.querySelectorAll("[data-tabs]");
+    for (const tabContainer of tabContainers) {
+        const tabTriggers = tabContainer.querySelectorAll("[data-tab-open]");
+        const buttons: HTMLElement[] = [];
+        let select: HTMLSelectElement | null = null;
+        for (const tabTrigger of tabTriggers) {
+            if (tabTrigger.tagName === "SELECT" && (tabTrigger as HTMLSelectElement).dataset.tabOpen === "") {
+                select = tabTrigger as HTMLSelectElement;
+                select.addEventListener("change", () => openTab(select!.value));
+            }
+            else {
+                buttons.push(tabTrigger as HTMLElement);
+                tabTrigger.addEventListener("click", () => openTab((tabTrigger as HTMLElement).dataset.tabOpen!));
+            }
+        }
+
+        const tabActivate = buttons.find(b => b.dataset.tabActivate !== undefined);
+
+        const activeClasses = tabActivate ? Array.from(tabActivate.classList) : [];
+        const inactiveClasses = Array.from(buttons.find(b => b.dataset.tabActivate === undefined)?.classList ?? []);
+
+        const openTab = (name: string): HTMLElement | undefined => {
+            const tab = tabContainer.querySelector(`[data-tab="${name}"]`) as HTMLElement | null;
+            if (!tab) return;
+            if (select) select.value = name;
+            for (const button of buttons) {
+                if (button.dataset.tabOpen === name) {
+                    button.classList.remove(...inactiveClasses);
+                    button.classList.add(...activeClasses);
+                }
+                else {
+                    button.classList.remove(...activeClasses);
+                    button.classList.add(...inactiveClasses);
+                }
+            }
+            tabContainer.querySelectorAll("[data-tab]").forEach(t => t.classList.add("hidden"));
+            tab.classList.remove("hidden");
+            return tab;
+        };
+
+        if (tabActivate) {
+            openTab(tabActivate.dataset.tabOpen!);
+            tabActivate.removeAttribute("data-tab-activate");
+        }
+    }
 });

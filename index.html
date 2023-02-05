@@ -89,28 +89,28 @@
 		</div>
 		<div class="mt-10">
 			<p class="font-medium text-slate-900">HTTP Request</p>
-			<div class="mt-3 rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+			<div class="mt-3 rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden" data-tabs>
 				<div>
 					<div class="sm:hidden">
 						<label for="tabs" class="sr-only">Select a tab</label>
-						<select id="tabs" name="tabs" class="block w-full rounded-md border-slate-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm">
-							<option value="parsed" selected>Headers</option>
-							<option value="raw">Request</option>
-							<option value="textarea">Raw</option>
+						<select data-tab-open id="tabs" name="tabs" class="block w-full rounded-md border-slate-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm">
+							<option value="headers" selected>Headers</option>
+							<option value="request">Request</option>
+							<option value="raw">Raw</option>
 						</select>
 					</div>
 					<div class="hidden sm:block">
 						<div class="border-b border-slate-100 px-3">
 							<nav class="-mb-px flex space-x-8" aria-label="Tabs">
-								<a href="#" class="whitespace-nowrap border-b-2 border-blue-500 py-4 px-1 text-sm font-medium text-blue-600" aria-current="page">Headers</a>
-								<a href="#" class="whitespace-nowrap border-b-2 border-transparent py-4 px-1 text-sm font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700">Request</a>
-								<a href="#" class="whitespace-nowrap border-b-2 border-transparent py-4 px-1 text-sm font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700">Raw</a>
+								<button data-tab-open="headers" data-tab-activate class="whitespace-nowrap border-b-2 border-blue-500 py-4 px-1 text-sm font-medium text-blue-600">Headers</button>
+								<button data-tab-open="request" class="whitespace-nowrap border-b-2 border-transparent py-4 px-1 text-sm font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700">Request</button>
+								<button data-tab-open="raw" class="whitespace-nowrap border-b-2 border-transparent py-4 px-1 text-sm font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700">Raw</button>
 							</nav>
 						</div>
 					</div>
 				</div>
 				<div class="mt-3">
-					<div>
+					<div data-tab="headers" class="hidden">
 						<div class="border-b border-slate-200">
 							<details class="group">
 								<summary class="marker:hidden marker:content-none cursor-pointer flex pb-3">
@@ -175,6 +175,8 @@
 							</details>
 						</div>
 					</div>
+					<div data-tab="request" class="hidden"></div>
+					<div data-tab="raw" class="hidden"></div>
 				</div>
 			</div>
 		</div>
