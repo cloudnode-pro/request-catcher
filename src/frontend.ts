@@ -1313,6 +1313,21 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // download button
+    const downloadButton = document.querySelector(`[data-req-download]`);
+    if (downloadButton) downloadButton.addEventListener("click", () => {
+        const request = Request.currentRequest;
+        if (!request) return;
+        //const blob = new Blob([request.data], {type: "message/http"});
+        const blob = new Blob([String.fromCharCode(...request.data)], {type: "message/http"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = request.id + ".http";
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
     // delete button
     const deleteButton = document.querySelector(`[data-req-delete]`);
     if (deleteButton) deleteButton.addEventListener("click", () => {
