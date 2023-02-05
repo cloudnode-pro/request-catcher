@@ -129,9 +129,9 @@ document.addEventListener("DOMContentLoaded", () => {
          * Get body of the request
          * @readonly
          */
-        public get body(): Uint8Array | undefined {
+        public get body(): Uint8Array {
             const index = this.data.findIndex((v, i) => v === 13 && this.data[i + 1] === 10 && this.data[i + 2] === 13 && this.data[i + 3] === 10);
-            if (index === -1) return undefined;
+            if (index === -1) return new Uint8Array(0);
             return this.data.slice(index + 4);
         }
 
@@ -531,7 +531,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const body = document.querySelector(`[data-req="body"]`);
             if (body) {
                 while (body.firstChild) body.removeChild(body.firstChild);
-                if (this.body) {
+                if (this.body.byteLength > 0) {
                     const head = document.createElement("div");
                     head.classList.add("flex", "items-center", "justify-between", "bg-slate-100", "p-2");
                     body.appendChild(head);
