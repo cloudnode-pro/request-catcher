@@ -818,6 +818,170 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /**
+     * Modal
+     * @class
+     */
+    class Modal {
+        /**
+         * Modal ID
+         * @readonly
+         */
+        public readonly id = Math.random().toString(36).slice(2);
+
+        /**
+         * Whether the modal is open
+         * @private
+         */
+        #open = false;
+
+        /**
+         * Whether the modal is open
+         * @readonly
+         */
+        public get open(): boolean {
+            return this.#open;
+        }
+
+        /**
+         * Modal window
+         * @readonly
+         */
+        public readonly modal = document.createElement("div");
+
+        /**
+         * Modal backdrop
+         * @readonly
+         */
+        private readonly backdrop = document.createElement("div");
+
+        /**
+         * Modal panel
+         * @readonly
+         */
+        public readonly panel = document.createElement("div");
+
+        /**
+         * Focus dummy
+         *
+         * This element ensures at least one element is focusable in the modal so that focus can be trapped.
+         * @private
+         */
+        private readonly focusDummy = document.createElement("button");
+
+        /**
+         * Modal body
+         * @readonly
+         */
+        public readonly body = document.createElement("div");
+
+        /**
+         * Modal footer
+         * @readonly
+         */
+        public readonly footer = document.createElement("div");
+
+        /**
+         * Create a new modal
+         * @param reusable If `true`, the modal will not be removed from the DOM after closing
+         */
+        public constructor(public readonly reusable = false) {
+            this.modal.classList.add("relative", "z-10", "hidden");
+            this.modal.setAttribute("aria-labelledby", "modal-title-" + this.id);
+            this.modal.setAttribute("role", "dialog");
+            this.modal.setAttribute("aria-modal", "true");
+            this.modal.id = "modal-" + this.id;
+
+            this.backdrop.classList.add("fixed", "inset-0", "bg-slate-500", "bg-opacity-75", "transition-opacity", "opacity-0", "ease-out", "duration-300");
+            this.modal.appendChild(this.backdrop);
+
+            const fixed = document.createElement("div");
+            fixed.classList.add("fixed", "inset-0", "z-10", "overflow-y-auto");
+            this.modal.appendChild(fixed);
+
+            const flex = document.createElement("div");
+            flex.classList.add("flex", "min-h-full", "items-end", "justify-center", "p4", "text-center", "sm:items-center", "sm:p-0");
+            fixed.appendChild(flex);
+
+            this.panel.classList.add("relative", "transform", "overflow-hidden", "rounded-lg", "bg-white", "text-left", "shadow-xl", "transition-all", "sm:my-8", "sm:w-full", "sm:max-w-lg", "ease-out", "duration-300", "opacity-0", "translate-y-4", "sm:translate-y-0", "sm:scale-95");
+            flex.appendChild(this.panel);
+
+            this.focusDummy.setAttribute("tabindex", "0");
+            this.focusDummy.classList.add("absolute", "top-0", "left-0", "w-px", "h-px", "outline-none", "opacity-0");
+            this.panel.appendChild(this.focusDummy);
+
+            this.body.classList.add("bg-white", "px-4", "pt-5", "pb-4", "sm:p-6", "sm:pb-4");
+            this.panel.appendChild(this.body);
+
+            this.footer.classList.add("bg-slate-50", "px-4", "py-3", "sm:flex", "sm:flex-row-reverse", "sm:px-6");
+            this.panel.appendChild(this.footer);
+
+            flex.addEventListener("click", e => {
+               if (e.target === flex) this.hide();
+            });
+
+            // trap focus
+            this.panel.addEventListener("keydown", (e: KeyboardEvent) => {
+                if (e.key !== "Tab" || !this.open) return;
+                const focusable = [...this.panel.querySelectorAll("a[href], button, textarea, input:not([type=hidden]), select, [tabindex]:not([tabindex='-1'])")].filter(el => !el.hasAttribute("disabled") && ((el as HTMLElement).offsetWidth > 0 || (el as HTMLElement).offsetHeight > 0)) as HTMLElement[];
+                if (focusable.length === 0) return;
+                e.preventDefault();
+                const firstFocusable = focusable[0]!;
+                const lastFocusable = focusable[focusable.length - 1]!;
+
+                if (e.shiftKey && document.activeElement === firstFocusable) lastFocusable.focus();
+                else if (document.activeElement === lastFocusable) firstFocusable.focus();
+            });
+        }
+
+        /**
+         * Show modal
+         */
+        public show(): void {
+            if (this.#open) return;
+            this.#open = true;
+
+            document.body.appendChild(this.modal);
+            this.modal.classList.remove("hidden");
+            this.focusDummy.focus();
+
+            setTimeout(() => {
+                this.backdrop.classList.remove("opacity-0");
+                this.backdrop.classList.add("opacity-100");
+
+                this.panel.classList.remove("opacity-0", "translate-y-4", "sm:translate-y-0", "sm:scale-95");
+                this.panel.classList.add("opacity-100", "translate-y-0", "sm:scale-100");
+            }, 10);
+        }
+
+        /**
+         * Hide modal
+         */
+        public hide(): void {
+            if (!this.#open) return;
+            this.#open = false;
+
+            this.backdrop.classList.remove("ease-out", "duration-300");
+            this.backdrop.classList.add("ease-in", "duration-200");
+
+            this.panel.classList.remove("ease-out", "duration-300");
+            this.panel.classList.add("ease-in", "duration-200");
+
+            setTimeout(() => {
+                this.backdrop.classList.remove("opacity-100");
+                this.backdrop.classList.add("opacity-0");
+
+                this.panel.classList.remove("opacity-100", "translate-y-0", "sm:scale-100");
+                this.panel.classList.add("opacity-0", "translate-y-4", "sm:translate-y-0", "sm:scale-95");
+
+                setTimeout(() => {
+                    if (!this.reusable) this.modal.remove();
+                    this.modal.classList.add("hidden");
+                }, 200);
+            }, 10);
+        }
+    }
+
+    /**
      * Screens
      * @class
      */
