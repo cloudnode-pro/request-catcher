@@ -1197,6 +1197,92 @@ document.addEventListener("DOMContentLoaded", () => {
         switchHeadersFn();
     }
 
+    // forward button
+    const forwardButton = document.querySelector(`[data-req-forward]`);
+    if (forwardButton) {
+        const modal = new Modal(true);
+        const title = modal.createTitle("h3");
+        title.classList.add("text-lg", "font-medium", "leading-6", "text-slate-900");
+        title.textContent = "Forward request";
+        modal.body.appendChild(title);
+
+        const description = document.createElement("p");
+        description.classList.add("mt-2", "text-sm", "text-slate-500");
+        description.textContent = "The request will be re-sent from your browser to the specified address. You can use this to forward the request to a local server to test handling of this request.";
+        modal.body.appendChild(description);
+
+        const form = document.createElement("form");
+        form.id = "forward";
+        form.classList.add("mt-4", "flex", "flex-col", "space-y-6");
+        modal.body.appendChild(form);
+
+        const urlContainer = document.createElement("div");
+        form.appendChild(urlContainer);
+        const urlLabel = document.createElement("label");
+        urlLabel.classList.add("mb-1", "block", "text-sm", "font-medium", "text-slate-700");
+        urlLabel.textContent = "Address";
+        urlLabel.setAttribute("for", "url");
+        urlContainer.appendChild(urlLabel);
+        const urlInput = document.createElement("input");
+        urlInput.classList.add("block", "w-full", "rounded-md", "border", "border-slate-300", "bg-white", "py-2", "px-3", "leading-5", "placeholder-slate-500", "shadow-sm", "focus:border-blue-500", "focus:outline-none", "focus:ring-1", "focus:ring-blue-500", "sm:text-sm");
+        urlInput.type = "text";
+        urlInput.id = "url";
+        urlInput.name = "url";
+        urlInput.placeholder = "http://localhost:8080/";
+        urlInput.autofocus = true;
+        urlContainer.appendChild(urlInput);
+
+        const checkBoxContainer = document.createElement("div");
+        checkBoxContainer.classList.add("flex", "items-start");
+        form.appendChild(checkBoxContainer);
+        const checkBoxSubContainer = document.createElement("div");
+        checkBoxSubContainer.classList.add("flex", "items-center", "h-5");
+        checkBoxContainer.appendChild(checkBoxSubContainer);
+        const checkBox = document.createElement("input");
+        checkBox.id = "future";
+        checkBox.name = "future";
+        checkBox.type = "checkbox";
+        checkBox.classList.add("h-4", "w-4", "rounded", "border-slate-300", "text-blue-600", "focus:ring-blue-500");
+        checkBoxSubContainer.appendChild(checkBox);
+        const checkBoxText = document.createElement("div");
+        checkBoxText.classList.add("ml-3", "text-sm");
+        checkBoxContainer.appendChild(checkBoxText);
+        const checkBoxLabel = document.createElement("label");
+        checkBoxLabel.classList.add("font-medium", "text-slate-700");
+        checkBoxLabel.setAttribute("for", "future");
+        checkBoxLabel.textContent = "Forward future requests";
+        checkBoxText.appendChild(checkBoxLabel);
+        const checkBoxDescription = document.createElement("p");
+        checkBoxDescription.classList.add("text-slate-500");
+        checkBoxDescription.textContent = "If enabled, new requests will also be forwarded automatically while your browser is open at this page.";
+        checkBoxText.appendChild(checkBoxDescription);
+
+        const buttonForward = document.createElement("button");
+        buttonForward.type = "submit";
+        buttonForward.setAttribute("form", "forward");
+        buttonForward.classList.add("inline-flex", "w-full", "justify-center", "rounded-md", "border", "border-transparent", "bg-blue-600", "px-4", "py-2", "text-base", "font-medium", "text-white", "shadow-sm", "hover:bg-blue-700", "focus:outline-none", "focus:ring-2", "focus:ring-blue-500", "focus:ring-offset-2", "focus:ring-offset-slate-50", "sm:ml-3", "sm:w-auto", "sm:text-sm");
+        buttonForward.textContent = "Forward";
+        modal.footer.appendChild(buttonForward);
+
+        const buttonCancel = document.createElement("button");
+        buttonCancel.type = "button";
+        buttonCancel.classList.add("mt-3", "inline-flex", "w-full", "justify-center", "rounded-md", "border", "border-slate-300", "bg-white", "px-4", "py-2", "text-base", "font-medium", "text-slate-700", "shadow-sm", "hover:bg-slate-50", "focus:outline-none", "focus:ring-2", "focus:ring-blue-500", "focus:ring-offset-2", "focus:ring-offset-slate-50", "sm:mt-0", "sm:ml-3", "sm:w-auto", "sm:text-sm");
+        buttonCancel.textContent = "Cancel";
+        buttonCancel.addEventListener("click", () => modal.hide());
+        modal.footer.appendChild(buttonCancel);
+
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            // TODO: forward request
+        });
+
+        forwardButton.addEventListener("click", () => {
+            const request = Request.currentRequest;
+            if (!request) return;
+            modal.show();
+        });
+    }
+
     // delete button
     const deleteButton = document.querySelector(`[data-req-delete]`);
     if (deleteButton) deleteButton.addEventListener("click", () => {
