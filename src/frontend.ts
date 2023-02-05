@@ -143,48 +143,54 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         /**
+         * Request method colours
+         * @readonly
+         * @static
+         */
+        public static readonly methodColours: Record<string, {bg: string, text: string}> = {
+            GET: {
+                bg: "bg-green-200",
+                text: "text-green-800"
+            },
+            POST: {
+                bg: "bg-blue-200",
+                text: "text-blue-800"
+            },
+            PUT: {
+                bg: "bg-orange-200",
+                text: "text-orange-800"
+            },
+            PATCH: {
+                bg: "bg-amber-200",
+                text: "text-amber-800"
+            },
+            DELETE: {
+                bg: "bg-red-200",
+                text: "text-red-800"
+            },
+            HEAD: {
+                bg: "bg-indigo-200",
+                text: "text-indigo-800"
+            },
+            OPTIONS: {
+                bg: "bg-sky-200",
+                text: "text-sky-800"
+            },
+            unknown: {
+                bg: "bg-slate-200",
+                text: "text-slate-800"
+            }
+        };
+
+        /**
          * Render request as HTML on the page
          */
         public render(): void {
-            const methodColours: Record<string, { bg: string, text: string }> = {
-                GET: {
-                    bg: "bg-green-200",
-                    text: "text-green-800"
-                },
-                POST: {
-                    bg: "bg-blue-200",
-                    text: "text-blue-800"
-                },
-                PUT: {
-                    bg: "bg-orange-200",
-                    text: "text-orange-800"
-                },
-                PATCH: {
-                    bg: "bg-amber-200",
-                    text: "text-amber-800"
-                },
-                DELETE: {
-                    bg: "bg-red-200",
-                    text: "text-red-800"
-                },
-                HEAD: {
-                    bg: "bg-indigo-200",
-                    text: "text-indigo-800"
-                },
-                OPTIONS: {
-                    bg: "bg-sky-200",
-                    text: "text-sky-800"
-                },
-                unknown: {
-                    bg: "bg-slate-200",
-                    text: "text-slate-800"
-                }
-            }
-
             const formattedMethod = document.querySelector(`[data-req="formatted-method"]`);
             if (formattedMethod) {
                 formattedMethod.textContent = this.method;
-                const colours = methodColours[this.method] ?? methodColours.unknown!;
+                const colours = Request.methodColours[this.method] ?? Request.methodColours.unknown!;
+                formattedMethod.classList.remove(...Object.values(Request.methodColours).map(colour => [colour.bg, colour.text]).flat());
                 formattedMethod.classList.add(colours.bg, colours.text);
             }
 
