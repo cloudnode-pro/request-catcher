@@ -929,12 +929,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (e.key !== "Tab" || !this.open) return;
                 const focusable = [...this.panel.querySelectorAll("a[href], button, textarea, input:not([type=hidden]), select, [tabindex]:not([tabindex='-1'])")].filter(el => !el.hasAttribute("disabled") && ((el as HTMLElement).offsetWidth > 0 || (el as HTMLElement).offsetHeight > 0)) as HTMLElement[];
                 if (focusable.length === 0) return;
-                e.preventDefault();
                 const firstFocusable = focusable[0]!;
                 const lastFocusable = focusable[focusable.length - 1]!;
 
-                if (e.shiftKey && document.activeElement === firstFocusable) lastFocusable.focus();
-                else if (document.activeElement === lastFocusable) firstFocusable.focus();
+                if (e.shiftKey && document.activeElement === firstFocusable) {
+                    e.preventDefault();
+                    lastFocusable.focus();
+                }
+                else if (document.activeElement === lastFocusable) {
+                    e.preventDefault();
+                    firstFocusable.focus();
+                }
             });
         }
 
