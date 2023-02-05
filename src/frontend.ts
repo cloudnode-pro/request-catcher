@@ -100,6 +100,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         /**
+         * Add data to request
+         * @param data
+         */
+        public addData(data: Uint8Array | ArrayBuffer): void {
+            this.#data = mergeUint8Arrays(this.#data, data);
+            if (Request.currentRequest?.id === this.id) this.render();
+        }
+
+        /**
          * Get body of the request
          * @readonly
          */
