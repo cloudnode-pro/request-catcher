@@ -740,7 +740,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     socket.on("data", (id: string, packet: ArrayBuffer) => {
         const req = buildingRequests[id];
-        if (!req) return;
+        if (!req) {
+            const req = storage.get(id);
+            if (!req) return;
+            req.addData(packet);
+            storage.save();
+        }
         else if (!req.data) req.data = new Uint8Array(packet);
         else req.data = mergeUint8Arrays(req.data, packet);
     });
