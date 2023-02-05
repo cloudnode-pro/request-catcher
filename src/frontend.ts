@@ -952,7 +952,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             document.body.appendChild(this.modal);
             this.modal.classList.remove("hidden");
-            this.focusDummy.focus();
+            (this.modal.querySelector("[autofocus]") as HTMLElement | null ?? this.focusDummy).focus();
 
             setTimeout(() => {
                 this.backdrop.classList.remove("opacity-0");
