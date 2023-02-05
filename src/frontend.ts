@@ -112,8 +112,10 @@ document.addEventListener("DOMContentLoaded", () => {
          * Get body of the request
          * @readonly
          */
-        public get body(): string | undefined {
-            return this.data.split("\r\n\r\n")[1];
+        public get body(): Uint8Array | undefined {
+            const index = this.data.findIndex((v, i) => v === 13 && this.data[i + 1] === 10 && this.data[i + 2] === 13 && this.data[i + 3] === 10);
+            if (index === -1) return undefined;
+            return this.data.slice(index + 4);
         }
 
         /**
