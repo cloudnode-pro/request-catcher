@@ -119,6 +119,176 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         /**
+         * Format body of request
+         */
+        public formatBody(): HTMLElement | undefined {
+            if (!this.body) return undefined;
+            const contentTypeIndex = this.headers.findIndex(h => h.toLowerCase() === "content-type");
+            if (contentTypeIndex === -1) return undefined;
+            const contentType = this.headers[contentTypeIndex + 1];
+            if (!contentType) return undefined;
+
+            const contentTypes = {
+                image: ["image/apng", "image/avif", "image/gif", "image/jpeg", "image/png", "image/svg+xml", "image/webp", "image/bmp", "image/x-icon", "image/tiff"],
+                video: ["video/mp4", "video/webm", "video/3gpp", "video/3gpp2", "video/3gp2", "video/mpeg", "video/quicktime", "video/ogg", "video/x-matroska", "video/x-msvideo", "video/x-ms-wmv", "video/x-flv", "video/x-m4v"],
+                audio: ["audio/mpeg", "audio/ogg", "audio/wav", "audio/webm", "audio/x-m4a", "audio/x-wav", "audio/x-aac", "audio/x-flac", "audio/x-matroska", "audio/x-ms-wma", "audio/x-ms-wax", "audio/x-pn-realaudio", "audio/x-pn-realaudio-plugin", "audio/x-realaudio", "audio/x-scpls", "audio/x-mpegurl", "audio/x-mpegurl"],
+            };
+
+            const programmingLanguages: Record<string, string[]> = {
+                markup: ["text/html", "application/xml", "image/svg+xml", "application/mathml+xml", "application/ssml+xml", "application/atom+xml", "application/rss+xml"],
+                css: ["text/css"],
+                javascript: ["application/javascript", "application/ecmascript", "application/x-javascript", "text/javascript", "text/ecmascript"],
+                abap: ["text/x-abap"],
+                abnf: ["application/abnf"],
+                actionscript: ["application/x-actionscript"],
+                ada: ["text/x-ada"],
+                apacheconf: ["text/apacheconf"],
+                apl: ["text/apl"],
+                applescript: ["text/applescript"],
+                aql: ["text/x-aql"],
+                arduino: ["text/x-arduino"],
+                aspnet: ["application/x-aspx"],
+                autohotkey: ["text/autohotkey"],
+                awk: ["text/x-awk"],
+                bash: ["application/x-sh", "application/x-shar", "application/x-shellscript", "text/x-sh", "text/x-shar", "text/x-shellscript"],
+                basic: ["text/x-basic"],
+                batch: ["application/x-bat", "application/x-cmd", "text/x-bat", "text/x-cmd"],
+                brainfuck: ["text/x-brainfuck"],
+                c: ["text/x-c"],
+                csharp: ["text/x-csharp"],
+                cpp: ["text/x-c++src"],
+                clojure: ["text/x-clojure"],
+                cmake: ["text/x-cmake"],
+                coffeescript: ["text/coffeescript", "text/x-coffeescript"],
+                csv: ["text/csv"],
+                d: ["text/x-d"],
+                dart: ["application/dart"],
+                diff: ["text/x-diff"],
+                django: ["application/x-django"],
+                "dns-zone-file": ["text/dns"],
+                dockerfile: ["text/x-dockerfile"],
+                ejs: ["application/x-ejs", "text/x-ejs", "application/x-eta", "text/x-eta"],
+                elixir: ["text/x-elixir"],
+                elm: ["text/x-elm"],
+                erlang: ["text/x-erlang"],
+                fsharp: ["text/x-fsharp"],
+                git: ["text/x-git"],
+                "linker-script": ["text/x-script.ld"],
+                go: ["text/x-go"],
+                "go-module": ["text/x-gomod"],
+                gradle: ["text/x-gradle"],
+                graphql: ["application/graphql"],
+                haml: ["text/x-haml"],
+                handlebars: ["text/x-handlebars-template"],
+                haskell: ["text/x-haskell"],
+                http: ["message/http"],
+                java: ["text/x-java"],
+                javadoc: ["text/x-javadoc"],
+                javastacktrace: ["text/x-java-stacktrace"],
+                jsdoc: ["text/x-jsdoc"],
+                json: ["application/json", "application/ld+json", "application/schema+json", "application/vnd.api+json", "application/vnd.geo+json", "application/vnd.sun.wadl+xml", "application/x-json", "text/json", "text/x-json"],
+                julia: ["text/x-julia"],
+                kotlin: ["text/x-kotlin"],
+                latex: ["application/x-latex"],
+                less: ["text/x-less"],
+                lisp: ["text/x-common-lisp"],
+                log: ["text/x-log"],
+                lua: ["text/x-lua"],
+                makefile: ["text/x-makefile"],
+                markdown: ["text/markdown"],
+                matlab: ["text/x-matlab"],
+                mongodb: ["text/x-mongodb"],
+                nginx: ["text/x-nginx-conf"],
+                objectivec: ["text/x-objectivec"],
+                pascal: ["text/x-pascal"],
+                perl: ["application/x-perl", "text/x-perl"],
+                php: ["application/x-httpd-php", "application/x-httpd-php-open", "application/x-php", "text/x-php"],
+                phpdoc: ["text/x-phpdoc"],
+                powershell: ["application/x-powershell", "text/x-powershell"],
+                properties: ["text/x-properties"],
+                pug: ["text/x-pug"],
+                python: ["application/x-python", "text/x-python"],
+                r: ["text/x-rsrc"],
+                jsx: ["text/jsx"],
+                tsx: ["text/tsx"],
+                regex: ["text/x-regex"],
+                ruby: ["application/x-ruby", "text/x-ruby"],
+                rust: ["text/x-rustsrc"],
+                sass: ["text/x-sass"],
+                scss: ["text/x-scss"],
+                scala: ["text/x-scala"],
+                sml: ["text/x-sml"],
+                sql: ["text/x-sql"],
+                swift: ["text/x-swift"],
+                systemd: ["text/x-systemd-unit"],
+                typescript: ["application/typescript", "text/typescript", "application/x-typescript", "text/x-typescript"],
+                "visual-basic": ["text/x-vb"],
+                yaml: ["text/x-yaml"],
+            };
+
+            const determineType = (): {type?: "image" | "video" | "audio" | "programming"} | {type: "programming", lang: string} => {
+                if (contentTypes.image.includes(contentType)) return {type: "image"};
+                if (contentTypes.video.includes(contentType)) return {type: "video"};
+                if (contentTypes.audio.includes(contentType)) return {type: "audio"};
+
+                for (const lang in programmingLanguages)
+                    if (programmingLanguages[lang]!.includes(contentType)) return {type: "programming", lang};
+
+                return {type: undefined};
+            }
+
+            const type = determineType();
+
+            if (!type.type) return undefined;
+
+            const div = document.createElement("div");
+
+            if (["image", "video", "audio"].includes(type.type!)) {
+                div.classList.add("flex", "w-full", "h-96", "bg-slate-50");
+                switch (type.type) {
+                    case "image": {
+                        const img = document.createElement("img");
+                        img.src = `data:${contentType};base64,${arrayBufferToBase64(this.body)}`;
+                        img.classList.add("object-contain", "max-w-full", "max-h-full", "m-auto");
+                        div.appendChild(img);
+                        break;
+                    }
+                    case "video": {
+                        const video = document.createElement("video");
+                        video.src = `data:${contentType};base64,${arrayBufferToBase64(this.body)}`;
+                        video.classList.add("object-contain", "max-w-full", "max-h-full", "m-auto");
+                        video.controls = true;
+                        div.appendChild(video);
+                        break;
+                    }
+                    case "audio": {
+                        const audio = document.createElement("audio");
+                        audio.src = `data:${contentType};base64,${arrayBufferToBase64(this.body)}`;
+                        audio.classList.add("m-auto");
+                        audio.controls = true;
+                        div.appendChild(audio);
+                        break;
+                    }
+                }
+                return div;
+            }
+
+            else if (type.type === "programming") {
+                const pre = document.createElement("pre");
+                pre.classList.add("w-full", "h-full", "p-4", "overflow-auto", "text-sm");
+                const code = document.createElement("code");
+                // @ts-ignore
+                code.classList.add(`language-${type.lang}`);
+                code.textContent = String.fromCharCode(...this.body);
+                pre.appendChild(code);
+                div.appendChild(pre);
+                return div;
+            }
+
+            return undefined;
+        }
+
+        /**
          * Get raw headers
          * @readonly
          */
