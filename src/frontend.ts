@@ -203,6 +203,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const date = document.querySelector(`[data-req="date"]`);
             if (date) date.innerHTML = `<time datetime="${this.date.toISOString()}">${this.date.toLocaleDateString(navigator.language, {month: 'short', day: 'numeric', year: 'numeric', hour: "numeric", minute: "numeric"})}</time>`;
 
+            const deleteButton = document.querySelector(`button[data-req-delete]`);
+            if (deleteButton) (deleteButton as HTMLButtonElement).dataset.reqDelete = this.id;
+
             const method = document.querySelector(`[data-req="method"]`);
             if (method) method.textContent = this.method;
 
@@ -674,6 +677,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         switchHeadersFn();
     }
+
+    // delete button
+    const deleteButton = document.querySelector(`[data-req-delete]`);
+    if (deleteButton) deleteButton.addEventListener("click", () => {
+        storage.delete((deleteButton as HTMLButtonElement).dataset.reqDelete!);
+        Screen.render("main");
+    });
 
     // determine which screen to show
     if (location.pathname === "/") Screen.render("home");
