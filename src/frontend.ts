@@ -40,6 +40,14 @@ document.addEventListener("DOMContentLoaded", () => {
         public readonly headers: string[];
 
         /**
+         * Get headers as entries
+         */
+        public get headersEntries(): [string, string][] {
+            const keys = this.headers.filter((_, i) => i % 2 === 0);
+            return keys.map((key, i) => [key, this.headers[i * 2 + 1]!]);
+        }
+
+        /**
          * Request method
          * @readonly
          */
@@ -132,9 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
          */
         public formatBody(): HTMLElement | undefined {
             if (!this.body) return undefined;
-            const contentTypeIndex = this.headers.findIndex(h => h.toLowerCase() === "content-type");
-            if (contentTypeIndex === -1) return undefined;
-            const contentType = this.headers[contentTypeIndex + 1];
+            const contentType = this.headersEntries.find(([key]) => key.toLowerCase() === "content-type")?.[1];
             if (!contentType) return undefined;
 
             const contentTypes = {
@@ -498,12 +504,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const formattedHeaders = document.querySelector(`[data-req="formatted-headers"]`);
             if (formattedHeaders) {
-                const headerNames = this.headers.filter((_, i) => i % 2 === 0);
-                const headerValues = this.headers.filter((_, i) => i % 2 === 1);
-                const headers: [string, string][] = [];
                 const capitalise = (str: string) => str.split("-").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join("-");
-                for (const i in headerNames) headers.push([capitalise(headerNames[i]!), headerValues[i]!]);
-                const sortedHeaders = headers.sort((a, b) => a[0].localeCompare(b[0]));
+                const headers = this.headersEntries.map(([key, value]) => [capitalise(key), value]);
+                const sortedHeaders = headers.sort((a, b) => a[0]!.localeCompare(b[0]!));
 
                 while (formattedHeaders.firstChild) formattedHeaders.removeChild(formattedHeaders.firstChild);
                 for (const [key, value] of sortedHeaders) {
@@ -515,7 +518,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     li.appendChild(document.createTextNode(" "));
                     const valueSpan = document.createElement("span");
                     valueSpan.classList.add("text-slate-900");
-                    valueSpan.textContent = value;
+                    valueSpan.textContent = value!;
                     li.appendChild(valueSpan);
                     formattedHeaders.appendChild(li);
                 }
@@ -535,8 +538,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     const p = document.createElement("p");
                     p.classList.add("text-sm", "leading-none", "text-slate-900");
-                    const contentTypeHeaderIndex = this.headers.findIndex(h => h.toLowerCase() === "content-type");
-                    const contentType = contentTypeHeaderIndex !== -1 ? this.headers[contentTypeHeaderIndex + 1] : "application/octet-stream";
+                    const contentType = this.headersEntries.find(([key]) => key.toLowerCase() === "content-type")?.[1] ?? "application/octet-stream";
 
                     /** @see https://stackoverflow.com/a/20732091/7089726 */
                     function humanFileSize(size: number): string {
