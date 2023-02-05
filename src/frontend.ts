@@ -886,7 +886,6 @@ document.addEventListener("DOMContentLoaded", () => {
          */
         public constructor(public readonly reusable = false) {
             this.modal.classList.add("relative", "z-10", "hidden");
-            this.modal.setAttribute("aria-labelledby", "modal-title-" + this.id);
             this.modal.setAttribute("role", "dialog");
             this.modal.setAttribute("aria-modal", "true");
             this.modal.id = "modal-" + this.id;
@@ -978,6 +977,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     this.modal.classList.add("hidden");
                 }, 200);
             }, 10);
+        }
+
+        /**
+         * Create title
+         * @param tagName Tag name
+         */
+        public createTitle(tagName: string): HTMLElement {
+            const title = document.createElement(tagName);
+            title.id = "modal-title-" + this.id;
+            this.modal.setAttribute("aria-labelledby", "modal-title-" + this.id);
+            return title;
         }
     }
 
