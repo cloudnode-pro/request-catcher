@@ -1,4 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
+    const usePushState = (a: HTMLAnchorElement) => {
+        if (a.target === "_blank" || !a.href.startsWith(location.origin)) return;
+        a.addEventListener("click", e => {
+            e.preventDefault();
+            history.pushState({}, "", a.href);
+            renderScreen();
+        });
+    }
+
     /**
      * Request
      * @class
@@ -1015,16 +1024,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     renderScreen();
-
-    // make link work with pushState
-    const usePushState = (a: HTMLAnchorElement) => {
-        if (a.target === "_blank" || !a.href.startsWith(location.origin)) return;
-        a.addEventListener("click", e => {
-            e.preventDefault();
-            history.pushState({}, "", a.href);
-            renderScreen();
-        });
-    }
 
     for (const a of document.querySelectorAll("a[href]") as NodeListOf<HTMLAnchorElement>) usePushState(a);
 
