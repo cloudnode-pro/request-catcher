@@ -558,7 +558,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     label.appendChild(input);
 
                     const switchDiv = document.createElement("div");
-                    switchDiv.classList.add("before:transition", "relative", "inline-flex", "h-5", "w-10", "flex-shrink-0", "cursor-pointer", "rounded-full", "border-2", "border-transparent", "bg-slate-200", "transition-colors", "duration-200", "ease-in-out", "before:block", "before:h-4", "before:w-4", "before:translate-x-0", "before:transform", "before:rounded-full", "before:bg-white", "before:shadow", "before:ring-0", "before:duration-200", "before:ease-in-out", "before:content-['']", "peer-checked:bg-blue-600", "peer-checked:before:translate-x-5", "peer-disabled:opacity-50");
+                    switchDiv.classList.add("before:transition", "relative", "inline-flex", "h-5", "w-10", "flex-shrink-0", "cursor-pointer", "rounded-full", "border-2", "border-transparent", "bg-slate-200", "transition-colors", "duration-200", "ease-in-out", "before:block", "before:h-4", "before:w-4", "before:translate-x-0", "before:transform", "before:rounded-full", "before:bg-white", "before:shadow", "before:ring-0", "before:duration-200", "before:ease-in-out", "before:content-['']", "peer-checked:bg-blue-600", "peer-checked:before:translate-x-5", "peer-disabled:opacity-50", "peer-focus:ring-2", "peer-focus:ring-blue-500", "peer-focus:ring-offset-2", "peer-focus:ring-offset-slate-100");
                     label.appendChild(switchDiv);
 
                     const container = document.createElement("div");
