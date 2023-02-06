@@ -144,6 +144,7 @@ export default class WebServer {
      * @param res Response
      */
     public requestHandler(req: http.IncomingMessage, res: http.ServerResponse): void {
+        if (this.main.config.serverName) res.setHeader("Server", this.main.config.serverName);
         if (!req.url) {
             res.writeHead(400, {"Content-Type": "text/plain"});
             res.end("bad request");
@@ -177,6 +178,12 @@ export default class WebServer {
         }
         else {
             const namespace = req.url!.slice(3, req.url!.indexOf("?") === -1 ? undefined : req.url!.indexOf("?"));
+            res.setHeader("Access-Control-Allow-Origin", "*");
+            res.setHeader("Access-Control-Allow-Headers", "*");
+            res.setHeader("Access-Control-Allow-Methods", "*");
+            res.setHeader("Access-Control-Allow-Credentials", "true");
+            res.setHeader("Access-Control-Expose-Headers", "*");
+
             res.writeHead(204);
             res.end();
             this.servers.websocket.to(namespace).emit("end", requestId, req.rawHeaders, req.httpVersion, req.method, req.url, req.socket.localPort === this.ports.https ? "https" : "http");
