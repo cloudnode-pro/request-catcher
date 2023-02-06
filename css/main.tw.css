@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+pre[class*=language-] {
+    @apply text-cyan-300;
+    @apply bg-slate-900;
+}
+
+.token.keyword,
+.token.builtin {
+    @apply text-pink-400;
+    @apply italic;
+}
+
+.token.string {
+    @apply text-green-300;
+}
+
+.token.punctuation {
+    @apply text-sky-200;
+}
+
+.token.operator {
+    @apply text-violet-200;
+}
+
+.token.comment {
+    @apply text-slate-500;
+}
+
+.token.class-name {
+    @apply text-amber-200;
+}

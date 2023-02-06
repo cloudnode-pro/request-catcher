@@ -102,3 +102,14 @@ dist
 
 # TernJS port file
 .tern-port
+
+# TypeScript emitted files
+*.js
+*.map
+*.d.ts
+
+# Project config
+config.json
+
+# Tailwind generated CSS
+css/main.css

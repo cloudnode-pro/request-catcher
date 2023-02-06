@@ -1,0 +1,42 @@
+{
+  "name": "request-catcher",
+  "version": "1.0.0",
+  "description": "Catch and debug HTTP packets or forward them to a local host",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "sudo c8 -r=html -r=text mocha",
+    "build:ts": "tsc",
+    "build:tw": "tailwindcss -i ./css/main.tw.css -o ./css/main.css",
+    "build": "npm run build:ts && npm run build:tw",
+    "start": "sudo node .",
+    "start:build": "npm run build && npm run start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cloudnode-pro/request-catcher.git"
+  },
+  "keywords": [
+    "http",
+    "http-requests",
+    "debug",
+    "webhooks-catcher",
+    "http-test"
+  ],
+  "author": "Cloudnode",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/cloudnode-pro/request-catcher/issues"
+  },
+  "homepage": "https://github.com/cloudnode-pro/request-catcher#readme",
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.3",
+    "@types/mustache": "^4.2.2",
+    "@types/node": "^18.11.18",
+    "tailwindcss": "^3.2.4",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "socket.io": "^4.5.4"
+  }
+}
